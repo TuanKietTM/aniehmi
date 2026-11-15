@@ -1,0 +1,484 @@
+{
+  "schemas": {
+    "people": [
+      { "name": "id", "label": "ID", "type": "number", "required": true, "core": true },
+      { "name": "avatar_url", "label": "Ảnh đại diện", "type": "image", "core": true },
+      { "name": "name", "label": "Họ tên", "type": "text", "required": true, "core": true },
+      { "name": "role_category", "label": "Phân loại vai trò", "type": "select", "required": true, "core": true, "options": ["Core Leaders", "Core Researchers", "Master Students", "Undergraduate Students", "Alliance Cooperatives"] },
+      { "name": "title", "label": "Chức danh", "type": "text", "required": true, "core": true },
+      { "name": "academic_rank", "label": "Học hàm/Học vị", "type": "text", "core": true },
+      { "name": "research_focus", "label": "Hướng nghiên cứu", "type": "textarea", "required": true, "core": true },
+      { "name": "email", "label": "Email liên hệ", "type": "text", "core": true },
+      { "name": "bio", "label": "Tiểu sử ngắn", "type": "textarea", "core": true },
+      { "name": "extra_images", "label": "Ảnh bổ sung", "type": "image_array", "core": false },
+      { "name": "extra_links", "label": "Link tham khảo", "type": "url_array", "core": false }
+    ],
+    "research_domains": [
+      { "name": "id", "label": "ID", "type": "number", "required": true, "core": true },
+      { "name": "code", "label": "Mã lĩnh vực", "type": "text", "required": true, "core": true },
+      { "name": "name", "label": "Tên lĩnh vực nghiên cứu", "type": "text", "required": true, "core": true },
+      { "name": "category", "label": "Phân loại", "type": "select", "required": true, "core": true, "options": ["Specific Learning Disorder", "Neurodevelopmental Condition"] },
+      { "name": "sample_size_info", "label": "Thông tin quy mô dữ liệu", "type": "textarea", "required": true, "core": true },
+      { "name": "stimuli_info", "label": "Thông tin kích thích (Stimuli)", "type": "textarea", "core": true },
+      { "name": "pipeline_steps", "label": "Pipeline thực nghiệm", "type": "textarea", "core": true },
+      { "name": "current_results", "label": "Kết quả hiện tại", "type": "textarea", "core": true },
+      { "name": "roadmap_1_2_years", "label": "Định hướng 1-2 năm tới", "type": "textarea", "core": true },
+      { "name": "extra_images", "label": "Ảnh bổ sung", "type": "image_array", "core": false },
+      { "name": "extra_links", "label": "Link tham khảo", "type": "url_array", "core": false }
+    ],
+    "projects_tasks": [
+      { "name": "id", "label": "ID", "type": "number", "required": true, "core": true },
+      { "name": "task_code", "label": "Mã nhiệm vụ", "type": "text", "required": true, "core": true },
+      { "name": "title", "label": "Tên nhiệm vụ/sản phẩm", "type": "text", "required": true, "core": true },
+      { "name": "category", "label": "Phân loại", "type": "select", "required": true, "core": true, "options": ["Common Platform", "Core Product - Screening", "Core Product - Intervention", "Commercialization", "Ongoing Grant"] },
+      { "name": "skill_domain", "label": "Lĩnh vực kỹ năng", "type": "select", "required": true, "core": true, "options": ["All", "Reading", "Writing", "Math"] },
+      { "name": "progress_percent", "label": "Tiến độ (%)", "type": "number", "required": true, "core": true },
+      { "name": "business_model", "label": "Mô hình kinh doanh", "type": "select", "required": true, "core": true, "options": ["Research / Open Framework", "B2B", "B2B/B2C"] },
+      { "name": "description", "label": "Mô tả chi tiết", "type": "textarea", "required": true, "core": true },
+      { "name": "extra_images", "label": "Ảnh bổ sung", "type": "image_array", "core": false },
+      { "name": "extra_links", "label": "Link tham khảo", "type": "url_array", "core": false }
+    ],
+    "products": [
+      { "name": "id", "label": "ID", "type": "number", "required": true, "core": true },
+      { "name": "name", "label": "Tên sản phẩm", "type": "text", "required": true, "core": true },
+      { "name": "category", "label": "Phân loại", "type": "select", "required": true, "core": true, "options": ["Screening Tool", "Intervention Tool", "Research Pipeline", "Hardware/Software"] },
+      { "name": "status", "label": "Trạng thái", "type": "text", "required": true, "core": true },
+      { "name": "description", "label": "Mô tả", "type": "textarea", "required": true, "core": true },
+      { "name": "tech_stack", "label": "Công nghệ", "type": "text", "core": true },
+      { "name": "business_model", "label": "Mô hình kinh doanh", "type": "text", "core": true },
+      { "name": "extra_images", "label": "Ảnh bổ sung", "type": "image_array", "core": false },
+      { "name": "extra_links", "label": "Link tham khảo", "type": "url_array", "core": false }
+    ],
+    "publications": [
+      { "name": "id", "label": "ID", "type": "number", "required": true, "core": true },
+      { "name": "title", "label": "Tên bài báo", "type": "text", "required": true, "core": true },
+      { "name": "type", "label": "Loại công bố", "type": "select", "required": true, "core": true, "options": ["Journal Article", "Conference Paper", "Workshop Paper", "Poster", "Thesis/Dissertation", "Systematic Review"] },
+      { "name": "domain", "label": "Lĩnh vực", "type": "text", "required": true, "core": true },
+      { "name": "year", "label": "Năm / Giai đoạn", "type": "text", "required": true, "core": true },
+      { "name": "authors", "label": "Nhóm tác giả thực hiện", "type": "text", "core": true },
+      { "name": "status", "label": "Trạng thái", "type": "text", "required": true, "core": true }
+    ],
+    "resources_networking": [
+      { "name": "item_name", "label": "Tên Bộ dữ liệu / Thiết bị / Đối tác", "type": "text", "required": true, "core": true },
+      { "name": "resource_type", "label": "Phân loại", "type": "select", "core": true, "options": ["Dataset", "Hardware Device", "Software Pipeline", "Partner Institution"] },
+      { "name": "specifications", "label": "Đặc tả kỹ thuật / Phân khối", "type": "text", "required": true, "core": true },
+      { "name": "scale_info", "label": "Quy mô / Số lượng mẫu", "type": "text", "required": true, "core": true },
+      { "name": "notes", "label": "Ghi chú khai thác & Annotation", "type": "textarea", "core": true }
+    ]
+  },
+  "data": {
+    "people": [
+      {
+        "id": 1,
+        "avatar_url": "https://placehold.co/240x280/1e3d54/ffffff?text=Core+Leader+01",
+        "name": "Thầy/Cô Dẫn dắt Nhóm nghiên cứu 01 (Co-Lead)",
+        "role_category": "Core Leaders",
+        "title": "Đồng Trưởng nhóm Nghiên cứu ANIE (Core Leader)",
+        "academic_rank": "PGS.TS. / TS. – Giảng viên cao cấp",
+        "research_focus": "AI & Human-Centered Technologies, Visual Attention, Multimodal Behavioral Analysis, Inclusive Education",
+        "email": "colead1.anie@university.edu.vn",
+        "bio": "Dẫn dắt định hướng chiến lược khoa học công nghệ của NHÓM NGHIÊN CỨU CÔNG NGHỆ – ANIE Research Group thuộc Khối 1 (Liên minh 4 nhóm), chủ trì kiến trúc nền tảng AI sàng lọc và can thiệp cá nhân hóa."
+      },
+      {
+        "id": 2,
+        "avatar_url": "https://placehold.co/240x280/1e3d54/ffffff?text=Core+Leader+02",
+        "name": "Thầy/Cô Dẫn dắt Nhóm nghiên cứu 02 (Co-Lead)",
+        "role_category": "Core Leaders",
+        "title": "Đồng Trưởng nhóm Nghiên cứu ANIE (Core Leader)",
+        "academic_rank": "TS. – Giảng viên chính",
+        "research_focus": "Human-Computer Interaction (HCI), Eye-Tracking & Physiological Computing, Adaptive Learning Systems",
+        "email": "colead2.anie@university.edu.vn",
+        "bio": "Đồng dẫn dắt NHÓM NGHIÊN CỨU CÔNG NGHỆ – ANIE Research Group, điều phối các chương trình thực nghiệm Eye-tracking/EEG/VR và kết nối liên ngành với Giáo dục đặc biệt & Tâm lý học lâm sàng."
+      },
+      {
+        "id": 3,
+        "avatar_url": "https://placehold.co/240x280/0f766e/ffffff?text=Researcher+01",
+        "name": "Nghiên cứu viên Tạo nguồn 01",
+        "role_category": "Core Researchers",
+        "title": "Core Researcher (Tạo nguồn)",
+        "academic_rank": "ThS. / NCS",
+        "research_focus": "Computer Vision, Scanpath/Gaze Representation, Synthetic Gaze & Data-Efficient Learning",
+        "email": "researcher1.anie@university.edu.vn",
+        "bio": "Phụ trách nhánh biểu diễn hành vi thị giác và giải quyết bài toán khan hiếm dữ liệu (data scarcity) cho Dyslexia & ASD."
+      },
+      {
+        "id": 4,
+        "avatar_url": "https://placehold.co/240x280/0f766e/ffffff?text=Researcher+02",
+        "name": "Nghiên cứu viên Tạo nguồn 02",
+        "role_category": "Core Researchers",
+        "title": "Core Researcher (Tạo nguồn)",
+        "academic_rank": "ThS. / NCS (Luận án Hoa – Dyscalculia)",
+        "research_focus": "Dyscalculia, Mathematical Eye-Tracking Stimuli, Personalized Learning & Adaptive Interfaces",
+        "email": "researcher2.anie@university.edu.vn",
+        "bio": "Phát triển hệ thống thu thập dữ liệu, thiết kế kích thích toán học phục vụ eye-tracking và nghiên cứu can thiệp cá nhân hóa kỹ năng Toán."
+      },
+      {
+        "id": 5,
+        "avatar_url": "https://placehold.co/240x280/0f766e/ffffff?text=Researcher+03",
+        "name": "Nghiên cứu viên Tạo nguồn 03",
+        "role_category": "Core Researchers",
+        "title": "Core Researcher (Tạo nguồn)",
+        "academic_rank": "ThS. / Giảng viên tạo nguồn",
+        "research_focus": "EEG + Eye Tracking Multimodal Fusion, Attention Detection & Handwriting Representation",
+        "email": "researcher3.anie@university.edu.vn",
+        "bio": "Điều phối nghiên cứu phát hiện sự chú ý (ADHD/Attention) và phân tích dữ liệu chữ viết tay học sinh tiểu học (Dysgraphia)."
+      },
+      {
+        "id": 6,
+        "avatar_url": "https://placehold.co/240x280/b45309/ffffff?text=Master+Y2-01",
+        "name": "Học viên Cao học Năm 2 (01)",
+        "role_category": "Master Students",
+        "title": "Master Student (Năm 2)",
+        "academic_rank": "Cao học K2",
+        "research_focus": "Vietnamese Reading Eye-Tracking Pipeline & ReadMe Personalized Reading Support",
+        "email": "master_y2_01@university.edu.vn",
+        "bio": "Tham gia xây dựng pipeline trích xuất fixation/saccade, heatmap/scanpath và phát triển hệ thống ReadMe."
+      },
+      {
+        "id": 7,
+        "avatar_url": "https://placehold.co/240x280/b45309/ffffff?text=Master+Y2-02",
+        "name": "Học viên Cao học Năm 2 (02)",
+        "role_category": "Master Students",
+        "title": "Master Student (Năm 2)",
+        "academic_rank": "Cao học K2",
+        "research_focus": "ASD Visual Attention Analysis & VR Assistive System",
+        "email": "master_y2_02@university.edu.vn",
+        "bio": "Phân tích dữ liệu eye-tracking trên 55 trẻ (28 ASD, 27 đối chứng) và hoàn thiện phiên bản cơ bản hệ thống VR."
+      },
+      {
+        "id": 8,
+        "avatar_url": "https://placehold.co/240x280/d97706/ffffff?text=04+Masters+Y1",
+        "name": "Nhóm 04 Học viên Cao học Năm 1 (HV 01 – HV 04)",
+        "role_category": "Master Students",
+        "title": "04 Master Students (Năm 1)",
+        "academic_rank": "04 Học viên Cao học Năm 1",
+        "research_focus": "Self-supervised Gaze Learning, Handwriting CV (Lớp 1–5), Multimodal EEG-Gaze & Adaptive Math/Reading HCI",
+        "email": "masters_y1@university.edu.vn",
+        "bio": "Gồm 04 học viên cao học năm 1 triển khai 4 hướng nghiên cứu mũi nhọn giai đoạn gần (1–2 năm tới) của nhóm ANIE."
+      },
+      {
+        "id": 9,
+        "avatar_url": "https://placehold.co/240x280/047857/ffffff?text=~30+Undergrads",
+        "name": "Khối ~30 Sinh viên Nghiên cứu (Năm 2, Năm 3 và Năm 4)",
+        "role_category": "Undergraduate Students",
+        "title": "Undergraduate Research Assistants (~30 Sinh viên)",
+        "academic_rank": "Sinh viên Năm 2, 3, 4",
+        "research_focus": "Thu thập dữ liệu RAI, Gán nhãn & Xử lý dữ liệu viết tay, Phát triển Web/App ReadMe, CASD, VR & Pipeline AI",
+        "email": "undergrad.anie@university.edu.vn",
+        "bio": "Lực lượng ~30 sinh viên năng động tham gia trực tiếp vào các nhóm thực nghiệm trường tiểu học, phát triển phần mềm và huấn luyện mô hình AI."
+      },
+      {
+        "id": 10,
+        "avatar_url": "https://placehold.co/240x280/3730a3/ffffff?text=Alliance+Partners",
+        "name": "Liên minh Chuyên gia Khối 1 (GD Đặc biệt • Tâm lý Lâm sàng • Khởi nghiệp)",
+        "role_category": "Alliance Cooperatives",
+        "title": "3 Nhóm Đối tác Liên minh trong Khối 1",
+        "academic_rank": "Chuyên gia Giáo dục đặc biệt, Tâm lý học lâm sàng & Khởi nghiệp",
+        "research_focus": "Chuẩn hóa bài đánh giá, gán nhãn dữ liệu chuyên gia (Annotation), thiết kế học liệu can thiệp & thương mại hóa B2B/B2C",
+        "email": "alliance.partners@anie.vn",
+        "bio": "Phối hợp chặt chẽ cùng NHÓM NGHIÊN CỨU CÔNG NGHỆ – ANIE Research Group để đảm bảo tính chuẩn xác lâm sàng, sư phạm và khả năng chuyển giao thực tế."
+      }
+    ],
+    "research_domains": [
+      {
+        "id": 1,
+        "code": "2.1. DYSLEXIA / READING",
+        "name": "Dyslexia / Reading Difficulties (Khó khăn về Đọc)",
+        "category": "Specific Learning Disorder",
+        "sample_size_info": "Đã xây dựng protocol eye-tracking cho bài toán đọc tiếng Việt và thực hiện nghiên cứu pilot trên 15 học sinh lớp 2 (gồm 03 trẻ dyslexia; 12 trẻ phát triển điển hình). Dữ liệu đang tiếp tục được thu thập và mở rộng qua dự án RAI (Responsible AI).",
+        "stimuli_info": "Pseudoword; Two-syllable word; Paragraph reading.",
+        "pipeline_steps": "Vietnamese reading stimuli ➔ Child experiment ➔ Eye tracking ➔ Fixation/saccade extraction ➔ Heatmap/scanpath ➔ Behavioral analysis (Bao gồm cả hệ thống hỗ trợ thu thập, xử lý và phân tích dữ liệu).",
+        "current_results": "• Systematic review về các nghiên cứu eye tracking liên quan đến dyslexia.\n• Nghiên cứu về đặc trưng hành vi thị giác trong quá trình đọc.\n• ReadMe / personalized reading support (hỗ trợ thu thập thêm dữ liệu phục vụ AI giai đoạn sau).\n• Nghiên cứu liên quan đến synthetic gaze và bài toán data scarcity.",
+        "roadmap_1_2_years": "Ưu tiên triển khai AI/HCI cho cá nhân hóa hỗ trợ học tập (characterization, adaptive presentation, personalized learning, adaptive task/content, teacher support) và mở rộng biểu diễn scanpath/gaze representation."
+      },
+      {
+        "id": 2,
+        "code": "2.2. DYSCALCULIA / MATH",
+        "name": "Dyscalculia / Mathematical Learning Difficulties (Khó khăn về Toán)",
+        "category": "Specific Learning Disorder",
+        "sample_size_info": "Dữ liệu từ nghiên cứu trong luận án Hoa (khác dạng dữ liệu đang tiếp tục thu trong dự án Responsible AI) + dữ liệu đang tiếp tục được thu thập mở rộng trong RAI.",
+        "stimuli_info": "Các dạng kích thích toán học (Mathematical stimuli) chuyên biệt phục vụ eye tracking.",
+        "pipeline_steps": "Math stimuli presentation ➔ Eye-tracking & physiological data acquisition ➔ Behavioral & cognitive load analysis ➔ Personalized math intervention.",
+        "current_results": "• 02 nghiên cứu tổng quan liên quan đến dyscalculia (physiological data; eye tracking; AI; technology-assisted intervention; personalized learning).\n• Hệ thống phần mềm phục vụ thu thập dữ liệu và bộ kích thích toán học phục vụ eye tracking.",
+        "roadmap_1_2_years": "Hoàn thiện hạ tầng dữ liệu toán học và phát triển hệ thống AI sàng lọc & can thiệp cá nhân hóa kỹ năng Toán tiếp nối sau mô hình Reading."
+      },
+      {
+        "id": 3,
+        "code": "2.3. DYSGRAPHIA / WRITING",
+        "name": "Dysgraphia / Writing Difficulties (Khó khăn về Viết)",
+        "category": "Specific Learning Disorder",
+        "sample_size_info": "Dữ liệu viết tay của học sinh từ Lớp 1 đến Lớp 5: khoảng 300–400 bản mỗi lớp (tổng ~1.500–2.000 bản); mỗi bản khoảng 1–4 dòng. Toàn bộ dữ liệu đã có annotation của chuyên gia.",
+        "stimuli_info": "Văn bản viết tay tiếng Việt chuẩn hóa theo chương trình tiểu học từ Lớp 1 đến Lớp 5.",
+        "pipeline_steps": "Handwriting sample collection (Grades 1–5) ➔ Expert clinical/pedagogical annotation ➔ Computer Vision handwriting representation ➔ Automated writing difficulty assessment.",
+        "current_results": "• Sở hữu bộ dữ liệu viết tay quy mô lớn (300–400 bản/lớp × 5 khối lớp) đã được chuyên gia gán nhãn chi tiết.",
+        "roadmap_1_2_years": "Phát triển handwriting representation như một bài toán Computer Vision (CV) độc lập trước khi đưa vào hệ thống AI sàng lọc và hỗ trợ đánh giá writing difficulties."
+      },
+      {
+        "id": 4,
+        "code": "2.4. ADHD / ATTENTION",
+        "name": "ADHD / Attention & Cognitive State (Bài toán Giao thoa)",
+        "category": "Neurodevelopmental Condition",
+        "sample_size_info": "Kết hợp dữ liệu đa phương thức EEG và Eye tracking cho bài toán phát hiện sự chú ý (Attention detection) và trạng thái nhận thức.",
+        "stimuli_info": "Các tác vụ đòi hỏi duy trì sự chú ý thị giác và nhận thức liên kết với Đọc – Viết – Toán.",
+        "pipeline_steps": "[Attention | Engagement | Distraction | Cognitive State] ➔ Multimodal Fusion (EEG + Eye Tracking) ➔ Kết nối trực tiếp xuống [Reading | Writing | Mathematics].",
+        "current_results": "• Các nghiên cứu tổng quan về eye tracking và ADHD.\n• Nghiên cứu kết hợp EEG và eye tracking cho attention detection.",
+        "roadmap_1_2_years": "Khai thác nền tảng EEG/eye tracking hiện có để mô hình hóa attention, engagement, cognitive state, multimodal behavior và tích hợp vào adaptive interfaces cho Reading và Math."
+      },
+      {
+        "id": 5,
+        "code": "2.5. ASD (AUTISM SPECTRUM)",
+        "name": "ASD – Rối loạn Phổ Tự kỷ (Visual Attention, HCI & VR)",
+        "category": "Neurodevelopmental Condition",
+        "sample_size_info": "Nghiên cứu thực nghiệm Eye-tracking trên 55 trẻ (từ 3–7 tuổi): gồm 28 trẻ ASD và 27 trẻ thuộc nhóm đối chứng (comparison). Dữ liệu đang tiếp tục được thu thập qua dự án Responsible AI (RAI).",
+        "stimuli_info": "Kích thích thị giác xã hội, tương tác hành vi và môi trường thực tế ảo (VR).",
+        "pipeline_steps": "Child visual attention experiment (55 children) ➔ Eye-tracking & behavioral analysis ➔ CASD assessment & VR assistive interaction.",
+        "current_results": "• Hoàn thành nghiên cứu thực nghiệm trên 55 trẻ (28 ASD, 27 comparison).\n• Phát triển công cụ CASD.\n• Hệ thống Thực tế ảo (VR) hỗ trợ trẻ ASD (phiên bản cơ bản đã tương đối hoàn chỉnh).",
+        "roadmap_1_2_years": "Tái sử dụng phương pháp biểu diễn ánh nhìn (gaze representation) và hành vi tương tác xuyên miền; nâng cấp hệ thống VR và CASD."
+      }
+    ],
+    "projects_tasks": [
+      {
+        "id": 1,
+        "task_code": "NV-01 (Khối A)",
+        "title": "Xây dựng Nền tảng chung (Phương pháp luận, Khung dữ liệu, Kiến trúc công nghệ, Nguyên tắc triển khai)",
+        "category": "Common Platform",
+        "skill_domain": "All",
+        "progress_percent": 65,
+        "business_model": "Research / Open Framework",
+        "description": "Nhiệm vụ nền tảng phục vụ chung cho cả 2 pha Sàng lọc và Can thiệp, đảm bảo 6 sản phẩm lõi liên thông chặt chẽ về dữ liệu, mô hình AI và quy trình vận hành."
+      },
+      {
+        "id": 2,
+        "task_code": "NV-02 (Khối B - Đọc 1)",
+        "title": "Hệ thống AI sàng lọc nguy cơ khó khăn trong kỹ năng Đọc (Dyslexia Screening)",
+        "category": "Core Product - Screening",
+        "skill_domain": "Reading",
+        "progress_percent": 75,
+        "business_model": "B2B",
+        "description": "Ứng dụng protocol eye-tracking đọc tiếng Việt (pseudoword, two-syllable word, paragraph) và phân tích scanpath/fixation để sàng lọc sớm nguy cơ Dyslexia tại trường tiểu học và trung tâm."
+      },
+      {
+        "id": 3,
+        "task_code": "NV-03 (Khối B - Đọc 2)",
+        "title": "Hệ thống AI can thiệp cá nhân hóa kỹ năng Đọc (Personalized Reading Intervention)",
+        "category": "Core Product - Intervention",
+        "skill_domain": "Reading",
+        "progress_percent": 70,
+        "business_model": "B2B/B2C",
+        "description": "Phát triển từ nền tảng ReadMe: cá nhân hóa cách trình bày văn bản (adaptive presentation), điều chỉnh nội dung học liệu theo hồ sơ cá nhân và hỗ trợ giáo viên/phụ huynh."
+      },
+      {
+        "id": 4,
+        "task_code": "NV-04 (Khối B - Viết 1)",
+        "title": "Hệ thống AI sàng lọc nguy cơ khó khăn trong kỹ năng Viết (Dysgraphia Screening)",
+        "category": "Core Product - Screening",
+        "skill_domain": "Writing",
+        "progress_percent": 60,
+        "business_model": "B2B",
+        "description": "Ứng dụng Computer Vision và handwriting representation huấn luyện trên bộ dữ liệu 1.500–2.000 bản viết tay tiểu học (Lớp 1–5) có gán nhãn chuyên gia để sàng lọc nguy cơ Dysgraphia."
+      },
+      {
+        "id": 5,
+        "task_code": "NV-05 (Khối B - Viết 2)",
+        "title": "Hệ thống AI can thiệp cá nhân hóa kỹ năng Viết (Personalized Writing Intervention)",
+        "category": "Core Product - Intervention",
+        "skill_domain": "Writing",
+        "progress_percent": 45,
+        "business_model": "B2B/B2C",
+        "description": "Cung cấp bài tập rèn viết cá nhân hóa, phản hồi trực quan và theo dõi tiến bộ kỹ năng vận động tinh – chữ viết cho học sinh tiểu học."
+      },
+      {
+        "id": 6,
+        "task_code": "NV-06 (Khối B - Toán 1)",
+        "title": "Hệ thống AI sàng lọc nguy cơ khó khăn trong kỹ năng Toán (Dyscalculia Screening)",
+        "category": "Core Product - Screening",
+        "skill_domain": "Math",
+        "progress_percent": 60,
+        "business_model": "B2B",
+        "description": "Sử dụng các dạng kích thích toán học (math stimuli), dữ liệu eye-tracking và sinh lý học để phát hiện sớm nguy cơ khó khăn học toán."
+      },
+      {
+        "id": 7,
+        "task_code": "NV-07 (Khối B - Toán 2)",
+        "title": "Hệ thống AI can thiệp cá nhân hóa kỹ năng Toán (Personalized Math Intervention)",
+        "category": "Core Product - Intervention",
+        "skill_domain": "Math",
+        "progress_percent": 50,
+        "business_model": "B2B/B2C",
+        "description": "Hệ thống giao diện và học liệu toán thích ứng dựa trên mức tải nhận thức (cognitive load) và trạng thái chú ý của từng học sinh."
+      },
+      {
+        "id": 8,
+        "task_code": "NV-08 (Khối C)",
+        "title": "Chuyển giao thử nghiệm, hoàn thiện quy trình triển khai & Đóng gói thương mại hóa",
+        "category": "Commercialization",
+        "skill_domain": "All",
+        "progress_percent": 40,
+        "business_model": "B2B/B2C",
+        "description": "Chuyển giao thử nghiệm trên quy mô phù hợp tới Trường tiểu học, Trung tâm GD hòa nhập/đặc biệt, Gia đình, Cơ sở y tế; đóng gói sản phẩm Sàng lọc (B2B) và Can thiệp (B2B/B2C)."
+      },
+      {
+        "id": 9,
+        "task_code": "DA-RAI",
+        "title": "Dự án Responsible AI (RAI) – Mở rộng thu thập dữ liệu đa miền chuẩn đạo đức",
+        "category": "Ongoing Grant",
+        "skill_domain": "All",
+        "progress_percent": 80,
+        "business_model": "Research / Open Framework",
+        "description": "Đang tiếp tục thu thập và mở rộng bộ dữ liệu chuẩn hóa cho cả 3 mảng: Dyslexia (Reading), Dyscalculia (Mathematics) và ASD."
+      }
+    ],
+    "products": [
+      {
+        "id": 1,
+        "name": "ReadMe – Personalized Reading Support System",
+        "category": "Intervention Tool",
+        "status": "Đang phát triển (phiên bản cơ bản tương đối hoàn chỉnh)",
+        "description": "Hệ thống hỗ trợ đọc cá nhân hóa cho trẻ khó khăn đọc tiếng Việt, tự động điều chỉnh cách trình bày văn bản (adaptive presentation) dựa trên hồ sơ cá nhân.",
+        "tech_stack": "Web App, Eye-Tracking, Adaptive UI, NLP tiếng Việt",
+        "business_model": "B2B/B2C"
+      },
+      {
+        "id": 2,
+        "name": "CASD – Clinical ASD Screening Dashboard",
+        "category": "Screening Tool",
+        "status": "Đã có phiên bản cơ bản",
+        "description": "Công cụ đánh giá sàng lọc Rối loạn Phổ Tự kỷ dựa trên phân tích hành vi thị giác eye-tracking và các bài đánh giá lâm sàng.",
+        "tech_stack": "Eye-Tracking, Behavioral Analysis, Clinical Assessment",
+        "business_model": "B2B"
+      },
+      {
+        "id": 3,
+        "name": "VR Assistive System for ASD",
+        "category": "Intervention Tool",
+        "status": "Đã có phiên bản cơ bản",
+        "description": "Hệ thống thực tế ảo tương tác hỗ trợ trẻ ASD rèn luyện kỹ năng chú ý, tương tác xã hội và các kỹ năng sống hàng ngày.",
+        "tech_stack": "VR Hardware, Unity, Interactive Scenarios",
+        "business_model": "B2B/B2C"
+      },
+      {
+        "id": 4,
+        "name": "Vietnamese Reading Eye-Tracking Pipeline",
+        "category": "Research Pipeline",
+        "status": "Hoàn thành nghiên cứu pilot, đang mở rộng dữ liệu RAI",
+        "description": "Pipeline đầy đủ từ thiết kế kích thích, thực nghiệm trẻ em, trích xuất fixation/saccade, heatmap/scanpath đến phân tích hành vi thị giác.",
+        "tech_stack": "Eye-Tracker, Python, OpenCV, Gaze Analysis",
+        "business_model": "Research / Open Framework"
+      },
+      {
+        "id": 5,
+        "name": "Handwriting CV Pipeline (Grades 1-5)",
+        "category": "Research Pipeline",
+        "status": "Đã có bộ dữ liệu 1.500-2.000 bản có annotation",
+        "description": "Hệ thống Computer Vision phân tích chữ viết tay học sinh tiểu học để phát hiện các dấu hiệu khó khăn viết (Dysgraphia).",
+        "tech_stack": "Computer Vision, CNN, Handwriting Representation",
+        "business_model": "Research / Open Framework"
+      }
+    ],
+    "publications": [
+      {
+        "id": 1,
+        "title": "Eye Tracking for Dyslexia: A Systematic Review of Vietnamese and International Research",
+        "type": "Systematic Review",
+        "domain": "Dyslexia / Reading",
+        "year": "2024-2025",
+        "authors": "Nhóm nghiên cứu ANIE",
+        "status": "Hoàn thành"
+      },
+      {
+        "id": 2,
+        "title": "Eye-Tracking Analysis of Reading Behavior in Vietnamese Children with and without Dyslexia",
+        "type": "Journal Article",
+        "domain": "Dyslexia / Reading",
+        "year": "2025",
+        "authors": "Nhóm nghiên cứu ANIE",
+        "status": "Đang viết bài"
+      },
+      {
+        "id": 3,
+        "title": "Mathematical Eye-Tracking Stimuli for Dyscalculia Research: A Systematic Review",
+        "type": "Systematic Review",
+        "domain": "Dyscalculia / Math",
+        "year": "2024-2025",
+        "authors": "Nhóm nghiên cứu ANIE",
+        "status": "Hoàn thành"
+      },
+      {
+        "id": 4,
+        "title": "Visual Attention Patterns in Children with ASD: An Eye-Tracking Study",
+        "type": "Conference Paper",
+        "domain": "ASD / Visual Attention",
+        "year": "2025",
+        "authors": "Nhóm nghiên cứu ANIE",
+        "status": "Đang nộp bài"
+      },
+      {
+        "id": 5,
+        "title": "EEG + Eye-Tracking Multimodal Fusion for Attention Detection in Neurodevelopmental Research",
+        "type": "Workshop Paper",
+        "domain": "ADHD / Attention",
+        "year": "2025",
+        "authors": "Nhóm nghiên cứu ANIE",
+        "status": "Hoạch định"
+      }
+    ],
+    "resources_networking": [
+      {
+        "id": 1,
+        "item_name": "Vietnamese Reading Eye-Tracking Dataset (Pilot & RAI Expansion)",
+        "resource_type": "Dataset",
+        "specifications": "Kích thích: Pseudoword, Two-syllable word, Paragraph reading tiếng Việt",
+        "scale_info": "15 học sinh lớp 2 (03 trẻ dyslexia, 12 trẻ phát triển điển hình) + Đang mở rộng qua RAI",
+        "notes": "Trích xuất đầy đủ fixation, saccade, heatmap, scanpath phục vụ phân tích hành vi thị giác và huấn luyện synthetic gaze."
+      },
+      {
+        "id": 2,
+        "item_name": "Primary School Handwriting Dataset (Dysgraphia / Writing)",
+        "resource_type": "Dataset",
+        "specifications": "Chữ viết tay học sinh từ Lớp 1 đến Lớp 5 (mỗi bản 1–4 dòng)",
+        "scale_info": "300–400 bản mỗi lớp (~1.500–2.000 mẫu), đã có annotation của chuyên gia",
+        "notes": "Phục vụ phát triển bài toán Computer Vision (handwriting representation) và đánh giá writing difficulties."
+      },
+      {
+        "id": 3,
+        "item_name": "Dyscalculia & Mathematical Learning Gaze Dataset",
+        "resource_type": "Dataset",
+        "specifications": "Dữ liệu eye-tracking kết hợp các dạng kích thích toán học (Math stimuli) & dữ liệu sinh lý học",
+        "scale_info": "Dữ liệu nghiên cứu luận án Hoa + Dữ liệu mở rộng trong dự án Responsible AI (RAI)",
+        "notes": "Tích hợp hệ thống phần mềm chuyên dụng phục vụ thu thập dữ liệu toán học."
+      },
+      {
+        "id": 4,
+        "item_name": "ASD Visual Attention Eye-Tracking Dataset",
+        "resource_type": "Dataset",
+        "specifications": "Dữ liệu chuyển động mắt và phân tích hành vi thị giác ở trẻ mầm non – tiểu học",
+        "scale_info": "55 trẻ từ 3–7 tuổi (28 trẻ ASD; 27 trẻ nhóm đối chứng comparison) + Mở rộng qua RAI",
+        "notes": "Kết nối trực tiếp với nghiên cứu CASD và hệ thống môi trường thực tế ảo (VR)."
+      },
+      {
+        "id": 5,
+        "item_name": "Hệ thống Thiết bị Đo đạc Đa phương thức (Eye-Tracking + EEG + VR Hardware)",
+        "resource_type": "Hardware Device",
+        "specifications": "Thiết bị Eye-tracker độ chính xác cao, hệ thống đo điện não đồ EEG & kính Thực tế ảo VR",
+        "scale_info": "Hạ tầng phòng thí nghiệm ANIE Research Group",
+        "notes": "Phục vụ các thực nghiệm đo attention, engagement, distraction, cognitive load và can thiệp VR."
+      },
+      {
+        "id": 6,
+        "item_name": "Khối 3 – Mạng lưới Trường Tiểu học & Trung tâm Hỗ trợ Phát triển Giáo dục Hòa nhập",
+        "resource_type": "Partner Institution",
+        "specifications": "Khối 3 - Triển khai & Phối hợp (Sàng lọc B2B & Can thiệp B2B/B2C)",
+        "scale_info": "Các trường tiểu học thực nghiệm & Trung tâm hỗ trợ phát triển GD hòa nhập",
+        "notes": "Phối hợp thu thập dữ liệu thực nghiệm, thử nghiệm sàng lọc sớm và hỗ trợ giáo viên."
+      },
+      {
+        "id": 7,
+        "item_name": "Khối 3 – Trung tâm Giáo dục Đặc biệt, Cơ sở Y tế (Can thiệp) & Mạng lưới Gia đình",
+        "resource_type": "Partner Institution",
+        "specifications": "Khối 3 - Triển khai & Phối hợp lâm sàng – gia đình",
+        "scale_info": "Trung tâm GD đặc biệt, Cơ sở y tế can thiệp & Phụ huynh học sinh",
+        "notes": "Tiếp nhận chuyển giao các hệ thống can thiệp cá nhân hóa Đọc – Viết – Toán, CASD và VR."
+      }
+    ]
+  }
+}

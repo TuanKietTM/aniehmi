@@ -1,0 +1,14 @@
+{
+  "name": "anie-hmi",
+  "version": "1.0.0",
+  "description": "ANIE Human-Machine Interface with CMS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  }
+}
