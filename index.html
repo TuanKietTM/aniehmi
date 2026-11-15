@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>ANIE – AI for Neurodiversity and Inclusive Education| Research Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -1308,6 +1309,18 @@
                 <div id="detailModalGallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
 
+            <!-- Attached Videos / Demos Gallery -->
+            <div id="detailVideosSection" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                    <h4 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                        <i data-lucide="video" class="w-4 h-4 text-rose-600"></i>
+                        <span>Video Demo, Mô phỏng Thực nghiệm & Hướng dẫn</span>
+                    </h4>
+                    <span id="detailVideosCount" class="text-[11px] font-semibold text-slate-500"></span>
+                </div>
+                <div id="detailModalVideos" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </div>
+
             <!-- Attached External Links / Documents / Repos -->
             <div id="detailLinksSection" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
                 <div class="flex items-center justify-between">
@@ -1353,33 +1366,35 @@
                         </div>
                     </form>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- 2. Add Image to Gallery -->
                         <form onsubmit="addDetailGalleryImage(event)"
-                              class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5">
-                            <div class="font-bold text-slate-800">2. Bổ sung Hình ảnh mới (Tải từ máy hoặc dán URL):</div>
-                            <div class="flex items-center gap-3">
-                                <div
-                                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-slate-50 overflow-hidden shrink-0">
-                                    <img id="newDetailImgPreview" src="https://placehold.co/160x120/1e3d54/ffffff?text=Preview"
-                                         alt="Preview" class="w-auto h-auto max-w-[88px] max-h-[68px] object-contain block" />
+                              class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5 flex flex-col justify-between">
+                            <div class="space-y-2.5">
+                                <div class="font-bold text-slate-800">2. Bổ sung Hình ảnh mới (Tải từ máy hoặc dán URL):</div>
+                                <div class="flex items-center gap-3">
+                                    <div
+                                            class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-slate-50 overflow-hidden shrink-0">
+                                        <img id="newDetailImgPreview" src="https://placehold.co/160x120/1e3d54/ffffff?text=Preview"
+                                             alt="Preview" class="w-auto h-auto max-w-[88px] max-h-[68px] object-contain block" />
+                                    </div>
+                                    <div class="flex-1 space-y-1.5">
+                                        <label
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-indigo-800 text-white font-semibold cursor-pointer text-xs">
+                                            <span>📁 Tải ảnh từ máy</span>
+                                            <input type="file" accept="image/*" class="hidden"
+                                                   onchange="handleImageFileUpload(this, 'newDetailImgUrl', 'newDetailImgPreview')" />
+                                        </label>
+                                        <input id="newDetailImgUrl" type="text" required placeholder="Hoặc dán link URL ảnh..."
+                                               oninput="document.getElementById('newDetailImgPreview').src = this.value || 'https://placehold.co/160x120/1e3d54/ffffff?text=Preview'"
+                                               class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-[11px]" />
+                                    </div>
                                 </div>
-                                <div class="flex-1 space-y-1.5">
-                                    <label
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-indigo-800 text-white font-semibold cursor-pointer text-xs">
-                                        <span>📁 Tải ảnh từ máy tính</span>
-                                        <input type="file" accept="image/*" class="hidden"
-                                               onchange="handleImageFileUpload(this, 'newDetailImgUrl', 'newDetailImgPreview')" />
-                                    </label>
-                                    <input id="newDetailImgUrl" type="text" required placeholder="Hoặc dán link URL ảnh..."
-                                           oninput="document.getElementById('newDetailImgPreview').src = this.value || 'https://placehold.co/160x120/1e3d54/ffffff?text=Preview'"
-                                           class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-[11px]" />
+                                <div>
+                                    <input id="newDetailImgCaption" type="text"
+                                           placeholder="Chú thích ảnh (VD: Heatmap đọc tiếng Việt lớp 2)..."
+                                           class="w-full px-3 py-1.5 rounded border border-slate-300 text-xs" />
                                 </div>
-                            </div>
-                            <div>
-                                <input id="newDetailImgCaption" type="text"
-                                       placeholder="Chú thích ảnh (VD: Heatmap đọc tiếng Việt lớp 2 / Giao diện ReadMe)..."
-                                       class="w-full px-3 py-1.5 rounded border border-slate-300 text-xs" />
                             </div>
                             <button type="submit"
                                     class="w-full py-2 rounded-lg bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs flex items-center justify-center gap-1.5">
@@ -1387,11 +1402,42 @@
                             </button>
                         </form>
 
-                        <!-- 3. Add External Link / Document -->
+                        <!-- 3. Add Video to Gallery -->
+                        <form onsubmit="addDetailGalleryVideo(event)"
+                              class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5 flex flex-col justify-between">
+                            <div class="space-y-2.5">
+                                <div class="font-bold text-slate-800">3. Bổ sung Video Demo (Tải file MP4/WebM hoặc link YouTube):</div>
+                                <div class="space-y-1.5">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <label
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-semibold cursor-pointer text-xs">
+                                            <span>🎬 Tải video từ máy tính</span>
+                                            <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden"
+                                                   onchange="handleVideoFileUpload(this, 'newDetailVideoUrl', 'newDetailVideoStatus')" />
+                                        </label>
+                                        <span id="newDetailVideoStatus" class="text-[10px] font-semibold text-emerald-700"></span>
+                                    </div>
+                                    <input id="newDetailVideoUrl" type="text" required
+                                           placeholder="Hoặc dán link YouTube, Drive, hoặc URL .mp4..."
+                                           class="w-full px-2.5 py-1.5 rounded border border-slate-300 text-[11px] font-mono" />
+                                </div>
+                                <div>
+                                    <input id="newDetailVideoCaption" type="text"
+                                           placeholder="Chú thích video (VD: Video demo hệ thống ReadMe / VR)..."
+                                           class="w-full px-3 py-1.5 rounded border border-slate-300 text-xs" />
+                                </div>
+                            </div>
+                            <button type="submit"
+                                    class="w-full py-2 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs flex items-center justify-center gap-1.5">
+                                <i data-lucide="video" class="w-3.5 h-3.5"></i> Thêm Video vào Mục này
+                            </button>
+                        </form>
+
+                        <!-- 4. Add External Link / Document -->
                         <form onsubmit="addDetailExternalLink(event)"
                               class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5 flex flex-col justify-between">
                             <div class="space-y-2.5">
-                                <div class="font-bold text-slate-800">3. Bổ sung Liên kết (Link Dataset, Bài báo, GitHub, Demo,
+                                <div class="font-bold text-slate-800">4. Bổ sung Liên kết (Link Dataset, Bài báo, GitHub, Demo,
                                     Drive):</div>
                                 <div>
                                     <label class="text-[11px] font-semibold text-slate-600 block mb-1">Tên hiển thị của liên kết
@@ -1522,6 +1568,7 @@
                             <option value="text">TEXT – Văn bản ngắn (1 dòng)</option>
                             <option value="textarea">TEXTAREA – Đoạn văn bản dài (nhiều dòng)</option>
                             <option value="image">IMAGE – Khung Hình ảnh (Tải ảnh từ máy / Dán URL)</option>
+                            <option value="video">VIDEO – Khung Video (Tải video MP4/WebM / Link YouTube)</option>
                             <option value="number">INTEGER / REAL – Số học (Số lượng, Năm, %)</option>
                             <option value="url">URL – Đường dẫn liên kết (Website, DOI, Scholar)</option>
                             <option value="date">DATE – Ngày tháng năm</option>
@@ -2084,6 +2131,103 @@
     let currentPortalMode = 'public';
     let isServerConnected = false;
 
+    // ==========================================
+    // HIGH-CAPACITY INDEXEDDB ENGINE (SOLVES LOCALSTORAGE 5MB QUOTA LIMIT FOR VIDEOS)
+    // ==========================================
+    const IDB_NAME = 'anie_portal_high_capacity_db';
+    const IDB_VERSION = 1;
+    const IDB_STORE = 'kv_store';
+    const inMemoryMediaMap = {};
+
+    function openAnieIDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          return reject(new Error('IndexedDB not supported'));
+        }
+        const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+        req.onupgradeneeded = (evt) => {
+          const idb = evt.target.result;
+          if (!idb.objectStoreNames.contains(IDB_STORE)) {
+            idb.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function idbSetItem(key, val) {
+      try {
+        const idb = await openAnieIDB();
+        return new Promise((resolve, reject) => {
+          const tx = idb.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).put(val, key);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (err) {
+        return false;
+      }
+    }
+
+    async function idbGetItem(key) {
+      try {
+        const idb = await openAnieIDB();
+        return new Promise((resolve, reject) => {
+          const tx = idb.transaction(IDB_STORE, 'readonly');
+          const req = tx.objectStore(IDB_STORE).get(key);
+          req.onsuccess = () => resolve(req.result !== undefined ? req.result : null);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (err) {
+        return null;
+      }
+    }
+
+    // Hydrate any idb://media_... references into fast Blob Object URLs for playback
+    async function hydrateMediaReferencesInDB() {
+      for (const tbl of Object.keys(db)) {
+        if (!Array.isArray(db[tbl])) continue;
+        for (const row of db[tbl]) {
+          if (!row || typeof row !== 'object') continue;
+          for (const k of Object.keys(row)) {
+            const v = row[k];
+            if (typeof v === 'string' && v.startsWith('idb://') && !inMemoryMediaMap[v]) {
+              const blobOrData = await idbGetItem(v);
+              if (blobOrData instanceof Blob) {
+                inMemoryMediaMap[v] = URL.createObjectURL(blobOrData);
+              } else if (typeof blobOrData === 'string') {
+                inMemoryMediaMap[v] = blobOrData;
+              }
+            }
+          }
+          if (Array.isArray(row.extra_videos)) {
+            for (const vid of row.extra_videos) {
+              if (vid && typeof vid.url === 'string' && vid.url.startsWith('idb://') && !inMemoryMediaMap[vid.url]) {
+                const blobOrData = await idbGetItem(vid.url);
+                if (blobOrData instanceof Blob) {
+                  inMemoryMediaMap[vid.url] = URL.createObjectURL(blobOrData);
+                } else if (typeof blobOrData === 'string') {
+                  inMemoryMediaMap[vid.url] = blobOrData;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Safe localStorage setter that never throws QuotaExceededError
+    function safeLocalStorageSet(key, valueStr) {
+      try {
+        localStorage.setItem(key, valueStr);
+        return true;
+      } catch (quotaErr) {
+        console.warn(`[INFO] Dữ liệu vượt giới hạn 5MB của localStorage (${key}), hệ thống tự động lưu vào IndexedDB dung lượng cao.`);
+        return false;
+      }
+    }
+
     // Sanitize all schemas and records to completely strip any `id` field
     function stripIdFromAllTables() {
       Object.keys(TABLE_SCHEMAS).forEach(tbl => {
@@ -2118,16 +2262,22 @@
           db = json.data;
           TABLE_SCHEMAS = json.schemas;
           stripIdFromAllTables();
+          await hydrateMediaReferencesInDB();
           isServerConnected = true;
           console.log('[INFO] Loaded data from server successfully');
           return true;
         }
       } catch (e) {
+        // Prefer high-capacity IndexedDB first, fallback to localStorage, then seed data
+        const idbDb = await idbGetItem(DB_STORAGE_KEY);
+        const idbSchema = await idbGetItem(SCHEMA_STORAGE_KEY);
         const savedDb = localStorage.getItem(DB_STORAGE_KEY);
         const savedSchema = localStorage.getItem(SCHEMA_STORAGE_KEY);
-        db = savedDb ? JSON.parse(savedDb) : JSON.parse(JSON.stringify(INITIAL_SEED_DB));
-        TABLE_SCHEMAS = savedSchema ? JSON.parse(savedSchema) : JSON.parse(JSON.stringify(DEFAULT_TABLE_SCHEMAS));
+
+        db = idbDb ? idbDb : (savedDb ? JSON.parse(savedDb) : JSON.parse(JSON.stringify(INITIAL_SEED_DB)));
+        TABLE_SCHEMAS = idbSchema ? idbSchema : (savedSchema ? JSON.parse(savedSchema) : JSON.parse(JSON.stringify(DEFAULT_TABLE_SCHEMAS)));
         stripIdFromAllTables();
+        await hydrateMediaReferencesInDB();
         isServerConnected = false;
         return false;
       }
@@ -2135,8 +2285,15 @@
 
     async function commitToServer() {
       stripIdFromAllTables();
-      localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(db));
-      localStorage.setItem(SCHEMA_STORAGE_KEY, JSON.stringify(TABLE_SCHEMAS));
+      await hydrateMediaReferencesInDB();
+
+      // Always store in high-capacity IndexedDB (supports large videos & datasets)
+      await idbSetItem(DB_STORAGE_KEY, db);
+      await idbSetItem(SCHEMA_STORAGE_KEY, TABLE_SCHEMAS);
+
+      // Also attempt localStorage sync safely without throwing QuotaExceededError
+      safeLocalStorageSet(DB_STORAGE_KEY, JSON.stringify(db));
+      safeLocalStorageSet(SCHEMA_STORAGE_KEY, JSON.stringify(TABLE_SCHEMAS));
 
       if (!isServerConnected) {
         renderAllSections();
@@ -2171,6 +2328,145 @@
       commitToServer();
     }
 
+    // Helper: Activate YouTube Embed on click without triggering Error 153
+    function activateYouTubeIframe(containerEl, videoId) {
+      if (!containerEl || !videoId) return;
+      const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+      // When opened via file:// or inside an about:srcdoc / null-origin sandboxed iframe,
+      // browsers cannot send the mandatory HTTP Referer header required by YouTube (resulting in Error 153).
+      const isFileOrNullOrigin =
+        window.location.protocol === 'file:' ||
+        window.location.origin === 'null' ||
+        !window.location.origin ||
+        window.location.href.startsWith('about:') ||
+        window.location.href.startsWith('blob:');
+
+      if (isFileOrNullOrigin) {
+        window.open(watchUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      // IMPORTANT: Do NOT append ?origin=... when Referrer-Policy is strict-origin-when-cross-origin,
+      // as YouTube's updated player validation throws Error 153 if origin/referer headers mismatch in nested frames.
+      const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      containerEl.innerHTML = `
+        <iframe
+          width="100%"
+          height="100%"
+          src="${embedSrc}"
+          title="YouTube video player"
+          frameborder="0"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          class="w-full h-full border-0">
+        </iframe>
+      `;
+    }
+
+    // Helper: Render HTML5 <video> or embedded YouTube/Vimeo/Drive <iframe> player
+    function renderVideoPlayerHTML(videoUrl, extraClasses = 'w-full aspect-video rounded-lg bg-slate-950 overflow-hidden shadow-sm') {
+      if (!videoUrl || typeof videoUrl !== 'string') return '';
+      let trimmed = videoUrl.trim();
+      if (!trimmed) return '';
+
+      // Resolve idb:// reference to its hydrated Blob URL if stored in IndexedDB
+      if (trimmed.startsWith('idb://')) {
+        if (inMemoryMediaMap[trimmed]) {
+          trimmed = inMemoryMediaMap[trimmed];
+        } else {
+          idbGetItem(trimmed).then(blob => {
+            if (blob instanceof Blob) {
+              inMemoryMediaMap[trimmed] = URL.createObjectURL(blob);
+              renderAllSections();
+            }
+          });
+          return `<div class="${extraClasses} flex items-center justify-center text-white text-xs">Đang nạp video từ bộ nhớ...</div>`;
+        }
+      }
+
+      // Detect YouTube URL (supports watch?v=, youtu.be/, embed/, shorts/, live/)
+      const ytMatch = trimmed.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        const videoId = ytMatch[1];
+        const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const thumbHq = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+        return `
+          <div class="${extraClasses} relative group select-none" onclick="event.stopPropagation()">
+            <div class="w-full h-full relative cursor-pointer" onclick="activateYouTubeIframe(this.parentElement, '${videoId}')">
+              <img src="${thumbHq}" alt="YouTube Video Thumbnail" referrerpolicy="no-referrer" class="w-full h-full object-cover opacity-95 group-hover:scale-105 group-hover:opacity-100 transition duration-300" onerror="this.src='https://placehold.co/640x360/0f172a/ffffff?text=YouTube+Video'" />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent flex flex-col items-center justify-center p-3">
+                <div class="w-16 h-11 rounded-2xl bg-red-600 group-hover:bg-red-500 text-white flex items-center justify-center shadow-xl transition transform group-hover:scale-110">
+                  <svg class="w-7 h-7 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span class="mt-2.5 px-3 py-1 rounded-full bg-slate-900/90 text-white text-[11px] font-bold border border-white/20 shadow">
+                  ▶ Phát Video YouTube
+                </span>
+              </div>
+            </div>
+            <div class="absolute bottom-2 left-2 right-2 z-10 flex items-center justify-between pointer-events-none">
+              <span class="px-2 py-0.5 rounded bg-black/70 text-white/90 text-[10px] font-medium">YouTube</span>
+              <a href="${watchUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
+                class="pointer-events-auto px-2.5 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold flex items-center gap-1 shadow transition">
+                <span>Xem trực tiếp trên YouTube ↗</span>
+              </a>
+            </div>
+          </div>
+        `;
+      }
+
+      // Detect Vimeo URL
+      const vimeoMatch = trimmed.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+      if (vimeoMatch && vimeoMatch[1]) {
+        return `
+          <div class="${extraClasses}" onclick="event.stopPropagation()">
+            <iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" class="w-full h-full border-0" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        `;
+      }
+
+      // Detect Google Drive file preview link
+      const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (driveMatch && driveMatch[1]) {
+        return `
+          <div class="${extraClasses}" onclick="event.stopPropagation()">
+            <iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          </div>
+        `;
+      }
+
+      // Direct video file (.mp4, .webm, .ogg, .mov, or uploaded data:video/... / server /uploads/...)
+      const resolvedSrc = (trimmed.startsWith('http') || trimmed.startsWith('data:') || trimmed.startsWith('blob:'))
+        ? trimmed
+        : `${API_BASE}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
+
+      return `
+        <div class="${extraClasses} flex items-center justify-center" onclick="event.stopPropagation()">
+          <video src="${resolvedSrc}" controls preload="metadata" playsinline class="w-full h-full max-h-72 object-contain bg-black"></video>
+        </div>
+      `;
+    }
+
+    // Helper: Render inline extra_videos preview on public showcase cards if present
+    function renderInlineExtraVideosOnCard(record) {
+      const extraVideos = Array.isArray(record.extra_videos) ? record.extra_videos : [];
+      if (extraVideos.length === 0) return '';
+      const firstVid = extraVideos[0];
+      return `
+        <div class="mt-3 pt-2.5 border-t border-slate-200/80 space-y-1.5" onclick="event.stopPropagation()">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-bold text-rose-700 flex items-center gap-1">
+              <span>🎬 ${firstVid.caption || 'Video Demo'}</span>
+            </span>
+            ${extraVideos.length > 1 ? `<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-800 font-semibold text-[10px]">+${extraVideos.length - 1} video khác</span>` : ''}
+          </div>
+          ${renderVideoPlayerHTML(firstVid.url, 'w-full aspect-video rounded-lg bg-slate-950 overflow-hidden border border-slate-200 shadow-sm')}
+        </div>
+      `;
+    }
+
     // Helper: Render extra custom fields added via CMS Schema Manager on public showcase cards
     function renderCustomFieldsHTML(tableName, record, coreFieldNames) {
       const schema = TABLE_SCHEMAS[tableName] || [];
@@ -2191,8 +2487,16 @@
                 </div>
               `;
         }
+        if (col.type === 'video') {
+          return `
+                <div class="space-y-1" onclick="event.stopPropagation()">
+                  <span class="font-bold text-rose-800 block">${col.label}:</span>
+                  ${renderVideoPlayerHTML(val)}
+                </div>
+              `;
+        }
         if (col.type === 'url') {
-          return `<div><strong class="text-slate-800">${col.label}:</strong> <a href="${val}" target="_blank" rel="noopener" class="text-indigo-700 underline break-all">${val}</a></div>`;
+          return `<div><strong class="text-slate-800">${col.label}:</strong> <a href="${val}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-indigo-700 underline break-all">${val}</a></div>`;
         }
         return `<div><strong class="text-slate-800">${col.label}:</strong> <span class="text-slate-600">${val}</span></div>`;
       }).join('')}
@@ -2288,6 +2592,7 @@
           const defaultPlaceholder = `https://placehold.co/240x240/1e3d54/ffffff?text=${encodeURIComponent(displayName.split(' ').slice(0, 2).join('+'))}`;
           const imgSrc = (person.avatar_url && person.avatar_url.trim() !== '') ? person.avatar_url : defaultPlaceholder;
           const extraImgCount = Array.isArray(person.extra_images) ? person.extra_images.length : 0;
+          const extraVidCount = Array.isArray(person.extra_videos) ? person.extra_videos.length : 0;
           const extraLinkCount = Array.isArray(person.extra_links) ? person.extra_links.length : 0;
           return `
                 <div onclick="openItemDetailModal('people', ${rowIndex})" class="cursor-pointer group rounded-xl border ${group.highlight ? 'border-2 border-indigo-900 bg-indigo-50/30 p-5 shadow-sm' : 'border-slate-200 bg-white p-4'} flex flex-col justify-between hover:shadow-md hover:border-indigo-500 transition">
@@ -2308,11 +2613,12 @@
                     </div>` : ''}
                     ${person.bio ? `<p class="mt-2.5 text-xs text-slate-600 leading-relaxed line-clamp-3">${person.bio}</p>` : ''}
                     ${renderCustomFieldsHTML('people', person, corePersonFields)}
+                    ${renderInlineExtraVideosOnCard(person)}
                   </div>
                   <div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between gap-2 text-[11px] text-slate-500">
                     <span class="font-mono truncate">${person.email || 'anie@university.edu.vn'}</span>
                     <span class="font-bold text-indigo-800 group-hover:underline shrink-0 flex items-center gap-1">
-                      <span>Chi tiết ${extraImgCount + extraLinkCount > 0 ? `(+${extraImgCount + extraLinkCount})` : ''}</span>
+                      <span>Chi tiết ${extraImgCount + extraVidCount + extraLinkCount > 0 ? `(+${extraImgCount + extraVidCount + extraLinkCount})` : ''}</span>
                       <span>➔</span>
                     </span>
                   </div>
@@ -2345,6 +2651,7 @@
       const coreFields = ['code', 'name', 'category', 'sample_size_info', 'stimuli_info', 'pipeline_steps', 'current_results', 'roadmap_1_2_years'];
       container.innerHTML = (db.research_domains || []).map((dom, idx) => {
         const extraImgCount = Array.isArray(dom.extra_images) ? dom.extra_images.length : 0;
+        const extraVidCount = Array.isArray(dom.extra_videos) ? dom.extra_videos.length : 0;
         const extraLinkCount = Array.isArray(dom.extra_links) ? dom.extra_links.length : 0;
         return `
         <div onclick="openItemDetailModal('research_domains', ${idx})" class="cursor-pointer group rounded-xl border border-slate-200 bg-slate-50/60 p-5 hover:border-teal-600 hover:shadow-md transition space-y-3">
@@ -2357,7 +2664,7 @@
               <h3 class="text-lg font-extrabold text-slate-900 group-hover:text-teal-800 mt-1.5 transition">${dom.name || ''}</h3>
             </div>
             <span class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-indigo-900 group-hover:bg-indigo-900 group-hover:text-white transition">
-              Xem chi tiết ${extraImgCount + extraLinkCount > 0 ? `(${extraImgCount} ảnh, ${extraLinkCount} link)` : ''} ➔
+              Xem chi tiết ${extraImgCount + extraVidCount + extraLinkCount > 0 ? `(${extraImgCount} ảnh, ${extraVidCount} video, ${extraLinkCount} link)` : ''} ➔
             </span>
           </div>
 
@@ -2379,6 +2686,7 @@
             </div>
           </div>
           ${renderCustomFieldsHTML('research_domains', dom, coreFields)}
+          ${renderInlineExtraVideosOnCard(dom)}
         </div>
       `}).join('');
     }
@@ -2388,6 +2696,7 @@
       const coreFields = ['task_code', 'title', 'category', 'skill_domain', 'progress_percent', 'business_model', 'description'];
       container.innerHTML = (db.projects_tasks || []).map((task, idx) => {
         const extraImgCount = Array.isArray(task.extra_images) ? task.extra_images.length : 0;
+        const extraVidCount = Array.isArray(task.extra_videos) ? task.extra_videos.length : 0;
         const extraLinkCount = Array.isArray(task.extra_links) ? task.extra_links.length : 0;
         const pct = Number(task.progress_percent || 0);
         return `
@@ -2403,6 +2712,7 @@
             <h4 class="font-extrabold text-slate-900 group-hover:text-indigo-800 text-sm mt-2 transition">${task.title || ''}</h4>
             <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">${task.description || ''}</p>
             ${renderCustomFieldsHTML('projects_tasks', task, coreFields)}
+            ${renderInlineExtraVideosOnCard(task)}
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
             <div>
@@ -2415,7 +2725,7 @@
               </div>
             </div>
             <div class="flex items-center justify-between text-[11px] pt-1">
-              <span class="text-slate-500">${extraImgCount} hình ảnh • ${extraLinkCount} liên kết</span>
+              <span class="text-slate-500">${extraImgCount} ảnh • ${extraVidCount} video • ${extraLinkCount} link</span>
               <span class="font-bold text-indigo-800 group-hover:underline">Xem chi tiết dự án / nhiệm vụ ➔</span>
             </div>
           </div>
@@ -2428,6 +2738,7 @@
       const coreFields = ['name', 'target_condition', 'phase', 'tech_stack', 'status', 'description'];
       container.innerHTML = (db.products || []).map((prod, idx) => {
         const extraImgCount = Array.isArray(prod.extra_images) ? prod.extra_images.length : 0;
+        const extraVidCount = Array.isArray(prod.extra_videos) ? prod.extra_videos.length : 0;
         const extraLinkCount = Array.isArray(prod.extra_links) ? prod.extra_links.length : 0;
         return `
         <div onclick="openItemDetailModal('products', ${idx})" class="cursor-pointer group rounded-xl border border-slate-200 bg-slate-50/70 p-5 flex flex-col justify-between hover:border-teal-600 hover:shadow-md transition">
@@ -2440,12 +2751,13 @@
             <div class="text-xs font-semibold text-indigo-800 mt-0.5">Đối tượng: ${prod.target_condition || ''}</div>
             <p class="text-xs text-slate-600 mt-2 leading-relaxed">${prod.description || ''}</p>
             ${renderCustomFieldsHTML('products', prod, coreFields)}
+            ${renderInlineExtraVideosOnCard(prod)}
           </div>
           <div class="mt-4 pt-3 border-t border-slate-200 space-y-1 text-[11px]">
             <div><strong class="text-slate-800">Công nghệ:</strong> <span class="text-slate-600">${prod.tech_stack || ''}</span></div>
             <div class="flex items-center justify-between pt-1">
               <span><strong class="text-slate-800">Trạng thái:</strong> <span class="text-emerald-700 font-semibold">${prod.status || ''}</span></span>
-              ${extraImgCount + extraLinkCount > 0 ? `<span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-800 font-bold">+${extraImgCount} ảnh / ${extraLinkCount} link</span>` : ''}
+              ${extraImgCount + extraVidCount + extraLinkCount > 0 ? `<span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-800 font-bold">+${extraImgCount} ảnh / ${extraVidCount} video / ${extraLinkCount} link</span>` : ''}
             </div>
           </div>
         </div>
@@ -2457,10 +2769,11 @@
       const coreFields = ['title', 'pub_type', 'domain', 'year', 'authors', 'status'];
       container.innerHTML = (db.publications || []).map((pub, idx) => {
         const extraImgCount = Array.isArray(pub.extra_images) ? pub.extra_images.length : 0;
+        const extraVidCount = Array.isArray(pub.extra_videos) ? pub.extra_videos.length : 0;
         const extraLinkCount = Array.isArray(pub.extra_links) ? pub.extra_links.length : 0;
         return `
         <div onclick="openItemDetailModal('publications', ${idx})" class="cursor-pointer group rounded-xl border border-slate-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-indigo-500 hover:shadow-sm transition">
-          <div class="space-y-1">
+          <div class="space-y-1 flex-1">
             <div class="flex flex-wrap items-center gap-2">
               <span class="px-2.5 py-0.5 rounded text-[11px] font-bold ${pub.pub_type === 'Journal WoS/Scopus' ? 'bg-indigo-100 text-indigo-900' :
             pub.pub_type === 'Patent/GPHI' ? 'bg-amber-100 text-amber-900' :
@@ -2472,11 +2785,12 @@
             <h4 class="font-bold text-slate-900 group-hover:text-indigo-800 text-sm transition">${pub.title || ''}</h4>
             <div class="text-xs text-slate-500">Tác giả / Đơn vị: ${pub.authors || 'ANIE Research Group'}</div>
             ${renderCustomFieldsHTML('publications', pub, coreFields)}
+            ${renderInlineExtraVideosOnCard(pub)}
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-semibold">${pub.status || ''}</span>
             <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-900 group-hover:bg-indigo-900 group-hover:text-white text-xs font-bold transition">
-              Chi tiết ${extraImgCount + extraLinkCount > 0 ? `(+${extraImgCount + extraLinkCount})` : ''} ➔
+              Chi tiết ${extraImgCount + extraVidCount + extraLinkCount > 0 ? `(+${extraImgCount + extraVidCount + extraLinkCount})` : ''} ➔
             </span>
           </div>
         </div>
@@ -2494,6 +2808,7 @@
 
       resContainer.innerHTML = resourcesList.map(({ item, rowIndex }) => {
         const extraImgCount = Array.isArray(item.extra_images) ? item.extra_images.length : 0;
+        const extraVidCount = Array.isArray(item.extra_videos) ? item.extra_videos.length : 0;
         const extraLinkCount = Array.isArray(item.extra_links) ? item.extra_links.length : 0;
         return `
         <div onclick="openItemDetailModal('resources_networking', ${rowIndex})" class="cursor-pointer group rounded-xl border border-slate-200 bg-slate-50/70 p-4 flex flex-col justify-between hover:border-teal-600 hover:bg-white hover:shadow-md transition">
@@ -2501,7 +2816,7 @@
             <div class="flex items-center justify-between gap-2">
               <span class="px-2.5 py-0.5 rounded bg-teal-900 text-white text-[11px] font-bold">${item.resource_type || ''}</span>
               <span class="text-[11px] font-bold text-teal-800 group-hover:underline flex items-center gap-1">
-                <span>Xem chi tiết ${extraImgCount + extraLinkCount > 0 ? `(${extraImgCount} ảnh, ${extraLinkCount} link)` : ''}</span>
+                <span>Xem chi tiết ${extraImgCount + extraVidCount + extraLinkCount > 0 ? `(${extraImgCount} ảnh, ${extraVidCount} video, ${extraLinkCount} link)` : ''}</span>
                 <span>➔</span>
               </span>
             </div>
@@ -2510,24 +2825,27 @@
             <p class="text-xs text-slate-600 mt-1">Đặc tả: ${item.specifications || ''}</p>
             ${item.notes ? `<p class="text-xs text-slate-500 mt-1.5 bg-white p-2 rounded border border-slate-200">${item.notes}</p>` : ''}
             ${renderCustomFieldsHTML('resources_networking', item, coreFields)}
+            ${renderInlineExtraVideosOnCard(item)}
           </div>
         </div>
       `}).join('');
 
       netContainer.innerHTML = partnersList.map(({ item, rowIndex }) => {
         const extraImgCount = Array.isArray(item.extra_images) ? item.extra_images.length : 0;
+        const extraVidCount = Array.isArray(item.extra_videos) ? item.extra_videos.length : 0;
         const extraLinkCount = Array.isArray(item.extra_links) ? item.extra_links.length : 0;
         return `
         <div onclick="openItemDetailModal('resources_networking', ${rowIndex})" class="cursor-pointer group rounded-xl border border-slate-200 bg-white p-4 flex items-start justify-between gap-3 shadow-sm hover:border-indigo-500 hover:shadow-md transition">
           <div class="space-y-1 flex-1">
             <div class="flex items-center justify-between gap-2">
               <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-800 text-[11px] font-bold border border-indigo-200">${item.specifications || ''}</span>
-              <span class="text-[11px] font-bold text-indigo-800 group-hover:underline">Chi tiết ${extraImgCount + extraLinkCount > 0 ? `(+${extraImgCount + extraLinkCount})` : ''} ➔</span>
+              <span class="text-[11px] font-bold text-indigo-800 group-hover:underline">Chi tiết ${extraImgCount + extraVidCount + extraLinkCount > 0 ? `(+${extraImgCount + extraVidCount + extraLinkCount})` : ''} ➔</span>
             </div>
             <h4 class="font-extrabold text-slate-900 group-hover:text-indigo-800 text-sm pt-1 transition">${item.item_name || ''}</h4>
             <p class="text-xs font-semibold text-teal-700">${item.scale_info || ''}</p>
             <p class="text-xs text-slate-600">${item.notes || ''}</p>
             ${renderCustomFieldsHTML('resources_networking', item, coreFields)}
+            ${renderInlineExtraVideosOnCard(item)}
           </div>
         </div>
       `}).join('');
@@ -2967,6 +3285,17 @@
             </div>
           `;
         }
+        if (col.type === 'video') {
+          return `
+            <div class="col-span-1 md:col-span-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+              <div class="text-[11px] font-bold uppercase text-rose-700 flex items-center gap-1.5">
+                <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                <span>${col.label}</span>
+              </div>
+              ${renderVideoPlayerHTML(val)}
+            </div>
+          `;
+        }
         if (col.type === 'url') {
           return `
             <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
@@ -3011,6 +3340,27 @@
             </div>
           </div>
         `).join('') : `<div class="col-span-full text-center py-4 text-slate-400">Chưa có hình ảnh minh họa bổ sung nào.</div>`;
+      }
+
+      // Extra Videos Gallery
+      const extraVideos = Array.isArray(record.extra_videos) ? record.extra_videos : [];
+      const videosSection = document.getElementById('detailVideosSection');
+      const videosContainer = document.getElementById('detailModalVideos');
+      document.getElementById('detailVideosCount').textContent = `${extraVideos.length} video`;
+
+      if (extraVideos.length === 0 && currentPortalMode !== 'member') {
+        videosSection.classList.add('hidden');
+      } else {
+        videosSection.classList.remove('hidden');
+        videosContainer.innerHTML = extraVideos.length > 0 ? extraVideos.map((vid, idx) => `
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between gap-2.5">
+            ${renderVideoPlayerHTML(vid.url)}
+            <div class="flex items-center justify-between gap-2 px-1">
+              <span class="text-xs font-bold text-slate-800">${vid.caption || 'Video minh họa / Demo'}</span>
+              ${currentPortalMode === 'member' ? `<button onclick="removeDetailGalleryVideo(${idx})" class="text-[11px] text-rose-600 hover:underline font-bold shrink-0">Xóa video</button>` : ''}
+            </div>
+          </div>
+        `).join('') : `<div class="col-span-full text-center py-4 text-slate-400">Chưa có video minh họa bổ sung nào.</div>`;
       }
 
       // Extra Links
@@ -3091,6 +3441,31 @@
       openItemDetailModal(currentDetailTable, currentDetailIndex);
     }
 
+    function addDetailGalleryVideo(e) {
+      e.preventDefault();
+      const record = (db[currentDetailTable] || [])[currentDetailIndex];
+      if (!record) return;
+      const url = document.getElementById('newDetailVideoUrl').value.trim();
+      const caption = document.getElementById('newDetailVideoCaption').value.trim();
+      if (!url) return;
+      if (!Array.isArray(record.extra_videos)) record.extra_videos = [];
+      record.extra_videos.push({ url, caption });
+      document.getElementById('newDetailVideoUrl').value = '';
+      document.getElementById('newDetailVideoCaption').value = '';
+      const statusEl = document.getElementById('newDetailVideoStatus');
+      if (statusEl) statusEl.textContent = '';
+      commitDatabase();
+      openItemDetailModal(currentDetailTable, currentDetailIndex);
+    }
+
+    function removeDetailGalleryVideo(idx) {
+      const record = (db[currentDetailTable] || [])[currentDetailIndex];
+      if (!record || !Array.isArray(record.extra_videos)) return;
+      record.extra_videos.splice(idx, 1);
+      commitDatabase();
+      openItemDetailModal(currentDetailTable, currentDetailIndex);
+    }
+
     function addDetailExternalLink(e) {
       e.preventDefault();
       const record = (db[currentDetailTable] || [])[currentDetailIndex];
@@ -3149,6 +3524,66 @@
       reader.readAsDataURL(file);
     }
 
+    async function handleVideoFileUpload(fileInput, targetInputId, statusSpanId) {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      const statusEl = statusSpanId ? document.getElementById(statusSpanId) : null;
+      const targetInput = document.getElementById(targetInputId);
+
+      if (statusEl) {
+        statusEl.textContent = 'Đang xử lý video...';
+        statusEl.className = 'text-[10px] font-semibold text-amber-700';
+      }
+
+      // 1. Try uploading to backend server (/api/upload-video or /api/upload) if connected
+      if (isServerConnected) {
+        try {
+          const formData = new FormData();
+          formData.append('video', file);
+          const response = await fetch(`${API_BASE}/api/upload-video`, {
+            method: 'POST',
+            body: formData
+          });
+          const contentType = response.headers.get('content-type') || '';
+          if (response.ok && contentType.includes('application/json')) {
+            const result = await response.json();
+            if (result.success && result.url) {
+              const finalUrl = result.url.startsWith('http') ? result.url : `${API_BASE}${result.url}`;
+              if (targetInput) targetInput.value = finalUrl;
+              if (statusEl) {
+                statusEl.textContent = `✓ Đã tải lên server (${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
+                statusEl.className = 'text-[10px] font-semibold text-emerald-700';
+              }
+              return;
+            }
+          }
+        } catch (err) {
+          // Fallback to local IndexedDB storage below
+        }
+      }
+
+      // 2. Store the binary Video File directly inside IndexedDB so it never triggers localStorage QuotaExceededError
+      const sizeMB = file.size / (1024 * 1024);
+      const mediaKey = `idb://video_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+      const blobUrl = URL.createObjectURL(file);
+      inMemoryMediaMap[mediaKey] = blobUrl;
+
+      const savedToIDB = await idbSetItem(mediaKey, file);
+      if (savedToIDB) {
+        if (targetInput) targetInput.value = mediaKey;
+        if (statusEl) {
+          statusEl.textContent = `✓ Đã lưu video vào bộ nhớ IndexedDB (${sizeMB.toFixed(1)} MB)`;
+          statusEl.className = 'text-[10px] font-semibold text-emerald-700';
+        }
+      } else {
+        if (targetInput) targetInput.value = blobUrl;
+        if (statusEl) {
+          statusEl.textContent = `✓ Đã nạp video (${sizeMB.toFixed(1)} MB)`;
+          statusEl.className = 'text-[10px] font-semibold text-emerald-700';
+        }
+      }
+    }
+
     function renderCMSTable() {
       const thead = document.getElementById('cmsTableHead');
       const tbody = document.getElementById('cmsTableBody');
@@ -3187,10 +3622,15 @@
                 </div>
               </td>`;
         }
+        if (c.type === 'video') {
+          return `<td class="p-3 border-r border-slate-100">
+                ${val ? `<span class="px-2 py-1 rounded bg-rose-50 text-rose-800 border border-rose-200 font-semibold text-[11px] inline-flex items-center gap-1">🎬 Có Video</span>` : `<span class="text-slate-400 text-[11px]">Trống</span>`}
+              </td>`;
+        }
         return `<td class="p-3 border-r border-slate-100 max-w-xs truncate" title="${String(val).replace(/"/g, '&quot;')}">${val}</td>`;
       }).join('')}
           <td class="p-3 text-right whitespace-nowrap space-x-1">
-            <button onclick="openItemDetailModal('${currentCMSTable}', ${idx})" class="px-2.5 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-semibold">Ảnh / Link / Chi tiết</button>
+            <button onclick="openItemDetailModal('${currentCMSTable}', ${idx})" class="px-2.5 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-semibold">Ảnh / Video / Link / Chi tiết</button>
             <button onclick="openRecordModal('${currentCMSTable}', ${idx})" class="px-2.5 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-semibold">Sửa</button>
             <button onclick="deleteRecord('${currentCMSTable}', ${idx})" class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold">Xóa</button>
           </td>
@@ -3248,6 +3688,25 @@
                   <input id="${inputId}" name="${field.name}" type="text" value="${val}" placeholder="Hoặc dán đường dẫn URL hình ảnh..." oninput="document.getElementById('${previewId}').src = this.value || 'https://placehold.co/160x160/1e3d54/ffffff?text=Avatar'" class="w-full px-2.5 py-1.5 rounded border border-slate-300 bg-white text-[11px]" />
                 </div>
               </div>
+            </div>
+          `;
+        }
+        if (field.type === 'video') {
+          const inputId = `vid_input_${field.name}`;
+          const statusId = `vid_status_${field.name}`;
+          return `
+            <div class="p-3 rounded-xl bg-rose-50/50 border border-rose-200 space-y-2">
+              <label class="font-bold text-rose-950 block flex items-center gap-1.5">
+                <span>🎬 ${field.label}</span>
+              </label>
+              <div class="flex flex-wrap items-center gap-2">
+                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-semibold cursor-pointer text-xs">
+                  <span>🎬 Chọn file Video (MP4/WebM) từ máy</span>
+                  <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden" onchange="handleVideoFileUpload(this, '${inputId}', '${statusId}')" />
+                </label>
+                <span id="${statusId}" class="text-[10px] font-semibold text-emerald-700"></span>
+              </div>
+              <input id="${inputId}" name="${field.name}" type="text" value="${String(val).replace(/"/g, '&quot;')}" placeholder="Hoặc dán link YouTube, Vimeo, Google Drive, hay URL .mp4..." class="w-full px-2.5 py-1.5 rounded border border-slate-300 bg-white text-[11px] font-mono" />
             </div>
           `;
         }
