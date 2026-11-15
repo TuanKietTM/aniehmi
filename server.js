@@ -12,6 +12,8 @@ const { createClient } = require('@libsql/client');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +24,47 @@ app.use(express.json({ limit: '10mb' })); // large for base64 images
 
 // Serve static files (anie-hmi.html etc.) from project root
 app.use(express.static(path.join(__dirname)));
+
+// Create uploads directory if not exists
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(UPLOADS_DIR));
+
+// ── Multer configuration for file uploads ──────────────────
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOADS_DIR);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename with original extension
+    const uniqueSuffix = uuidv4();
+    const ext = path.extname(file.originalname);
+    cb(null, `logo-${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif, webp, svg)'));
+    }
+  }
+});
 
 // ── Turso / LibSQL Setup ──────────────────────────────────
 let db;
@@ -119,13 +162,14 @@ async function seedDatabase() {
 
 /**
  * GET /api/data
- * Returns ALL tables' data + schemas in one request.
+ * Returns ALL tables' data + schemas + settings in one request.
  * This is what the Showcase client calls on load.
  */
 app.get('/api/data', async (req, res) => {
   try {
     const dataResult = await db.execute('SELECT table_name, data FROM cms_data');
     const schemaResult = await db.execute('SELECT table_name, schema FROM cms_schemas');
+    const settingsResult = await db.execute('SELECT key, value FROM cms_settings');
 
     const data = {};
     for (const row of dataResult.rows) {
@@ -136,8 +180,13 @@ app.get('/api/data', async (req, res) => {
     for (const row of schemaResult.rows) {
       schemas[row.table_name] = JSON.parse(row.schema);
     }
+    
+    const settings = {};
+    for (const row of settingsResult.rows) {
+      settings[row.key] = row.value;
+    }
 
-    res.json({ success: true, data, schemas });
+    res.json({ success: true, data, schemas, settings });
   } catch (err) {
     console.error('[ERROR] GET /api/data:', err);
     res.status(500).json({ success: false, error: err.message });
@@ -289,6 +338,101 @@ app.put('/api/settings/:key', async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/upload-logo
+ * Uploads a logo file to the server and returns its URL
+ */
+app.post('/api/upload-logo', upload.single('logo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Không có file ảnh được tải lên' });
+    }
+    
+    // Get slot from request body (1 or 2)
+    const slot = req.body.slot || '1';
+    
+    // Generate the public URL for the uploaded logo
+    const logoUrl = `/uploads/${req.file.filename}`;
+    
+    // Save the logo URL to settings based on slot
+    const settingKey = slot === '1' ? 'logo1_url' : 'logo2_url';
+    await db.execute(
+      'INSERT OR REPLACE INTO cms_settings (key, value) VALUES (?, ?)',
+      [settingKey, logoUrl]
+    );
+    
+    // Return success response with the logo URL
+    res.json({ 
+      success: true, 
+      url: logoUrl,
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      slot: slot
+    });
+  } catch (err) {
+    console.error('[ERROR] POST /api/upload-logo:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * DELETE /api/logo/:slot
+ * Deletes a specific logo from the server and database
+ */
+app.delete('/api/logo/:slot', async (req, res) => {
+  try {
+    const { slot } = req.params;
+    const settingKey = slot === '1' ? 'logo1_url' : 'logo2_url';
+    
+    // Get current logo URL from settings
+    const result = await db.execute('SELECT value FROM cms_settings WHERE key = ?', [settingKey]);
+    
+    if (result.rows.length > 0 && result.rows[0].value) {
+      const currentUrl = result.rows[0].value;
+      
+      // Only delete if it's a local uploads file
+      if (currentUrl.startsWith('/uploads/')) {
+        const filename = currentUrl.split('/').pop();
+        const filePath = path.join(UPLOADS_DIR, filename);
+        
+        // Delete file if exists
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      
+      // Remove from database
+      await db.execute('DELETE FROM cms_settings WHERE key = ?', [settingKey]);
+    }
+    
+    res.json({ success: true, message: `Logo ${slot} đã được xóa` });
+  } catch (err) {
+    console.error('[ERROR] DELETE /api/logo/:slot:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/logo
+ * Returns all logo URLs
+ */
+app.get('/api/logo', async (req, res) => {
+  try {
+    const result = await db.execute('SELECT key, value FROM cms_settings WHERE key IN (?, ?)', ['logo1_url', 'logo2_url']);
+    const logos = { logo1_url: null, logo2_url: null };
+    
+    for (const row of result.rows) {
+      logos[row.key] = row.value;
+    }
+    
+    res.json({ success: true, logos });
+  } catch (err) {
+    console.error('[ERROR] GET /api/logo:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
