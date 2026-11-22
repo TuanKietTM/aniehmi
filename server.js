@@ -12,8 +12,10 @@ const { createClient } = require('@libsql/client');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
+const ffmpeg = require('fluent-ffmpeg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,12 +29,23 @@ app.use(express.static(path.join(__dirname)));
 
 // Create uploads directory if not exists
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const VIDEO_DIR = path.join(__dirname, 'videos');
+const HLS_DIR = path.join(__dirname, 'hls');
+
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+if (!fs.existsSync(VIDEO_DIR)) {
+  fs.mkdirSync(VIDEO_DIR, { recursive: true });
+}
+if (!fs.existsSync(HLS_DIR)) {
+  fs.mkdirSync(HLS_DIR, { recursive: true });
 }
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(UPLOADS_DIR));
+app.use('/videos', express.static(VIDEO_DIR));
+app.use('/hls', express.static(HLS_DIR));
 
 // ── Multer configuration for file uploads ──────────────────
 const storage = multer.diskStorage({
@@ -65,6 +78,63 @@ const upload = multer({
     }
   }
 });
+
+// Multer configuration for video uploads
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, VIDEO_DIR);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = uuidv4();
+    const ext = path.extname(file.originalname);
+    cb(null, `video-${uniqueSuffix}${ext}`);
+  }
+});
+
+const videoUpload = multer({
+  storage: videoStorage,
+  limits: {
+    fileSize: 500 * 1024 * 1024 // 500MB limit for videos
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /mp4|webm|ogg|mov|avi|mkv/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = file.mimetype.startsWith('video/');
+    
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Chỉ chấp nhận file video (mp4, webm, ogg, mov, avi, mkv)'));
+    }
+  }
+});
+
+// Convert video to HLS using FFmpeg
+function convertToHLS(inputPath, outputDir, baseName) {
+  return new Promise((resolve, reject) => {
+    const outputPath = path.join(outputDir, `${baseName}.m3u8`);
+    
+    ffmpeg(inputPath)
+      .addOptions([
+        '-profile:v baseline',
+        '-level 3.0',
+        '-start_number 0',
+        '-hls_time 10',
+        '-hls_list_size 0',
+        '-f hls'
+      ])
+      .output(outputPath)
+      .on('end', () => {
+        console.log(`[INFO] HLS conversion completed: ${outputPath}`);
+        resolve(`/hls/${baseName}.m3u8`);
+      })
+      .on('error', (err) => {
+        console.error('[ERROR] HLS conversion failed:', err);
+        reject(err);
+      })
+      .run();
+  });
+}
 
 // ── Turso / LibSQL Setup ──────────────────────────────────
 let db;
@@ -433,6 +503,62 @@ app.get('/api/logo', async (req, res) => {
     res.json({ success: true, logos });
   } catch (err) {
     console.error('[ERROR] GET /api/logo:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/upload-video
+ * Uploads a video file, converts to HLS using FFmpeg, and returns HLS URL
+ */
+app.post('/api/upload-video', videoUpload.single('video'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Không có file video được tải lên' });
+    }
+    
+    const inputPath = req.file.path;
+    const baseName = path.basename(req.file.filename, path.extname(req.file.filename));
+    
+    console.log(`[INFO] Starting video conversion: ${req.file.originalname} (${(req.file.size / 1024 / 1024).toFixed(2)} MB)`);
+    
+    try {
+      const hlsUrl = await convertToHLS(inputPath, HLS_DIR, baseName);
+      
+      res.json({ 
+        success: true, 
+        url: hlsUrl,
+        filename: `${baseName}.m3u8`,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        type: 'hls'
+      });
+      
+      setTimeout(() => {
+        try {
+          fs.unlinkSync(inputPath);
+          console.log(`[INFO] Cleaned up original video file: ${inputPath}`);
+        } catch (cleanupErr) {
+          console.warn('[WARN] Could not delete original video file:', cleanupErr.message);
+        }
+      }, 5000);
+      
+    } catch (conversionErr) {
+      console.error('[ERROR] HLS conversion failed, falling back to direct MP4:', conversionErr.message);
+      
+      const videoUrl = `/videos/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        url: videoUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        type: 'mp4'
+      });
+    }
+    
+  } catch (err) {
+    console.error('[ERROR] POST /api/upload-video:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

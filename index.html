@@ -8,6 +8,7 @@
     <title>ANIE – AI for Neurodiversity and Inclusive Education | Research Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1965,6 +1966,40 @@
       `;
     }
 
+    // Store HLS instances to manage them properly
+    window.hlsInstances = {};
+
+    function initHLSVideo(videoElement, videoUrl) {
+      if (!videoElement || !videoUrl) return;
+      
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60
+        });
+        
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoElement);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          videoElement.play().catch(() => {});
+        });
+        
+        const videoId = videoElement.id || `hls-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+        videoElement.id = videoId;
+        window.hlsInstances[videoId] = hls;
+        
+        videoElement.addEventListener('destroy', () => {
+          if (window.hlsInstances[videoId]) {
+            window.hlsInstances[videoId].destroy();
+            delete window.hlsInstances[videoId];
+          }
+        });
+      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        videoElement.src = videoUrl;
+      }
+    }
+
     function renderVideoPlayerHTML(videoUrl, extraClasses = 'w-full aspect-video rounded-xl bg-slate-950 overflow-hidden shadow-sm') {
       if (!videoUrl || typeof videoUrl !== 'string') return '';
       let trimmed = videoUrl.trim();
@@ -1983,6 +2018,27 @@
           });
           return `<div class="${extraClasses} flex items-center justify-center text-white text-xs">Đang nạp video từ bộ nhớ...</div>`;
         }
+      }
+
+      // Detect HLS URL (.m3u8)
+      const isHLS = trimmed.endsWith('.m3u8') || trimmed.includes('.m3u8');
+      
+      if (isHLS) {
+        const videoId = `hls-video-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+        const resolvedSrc = trimmed.startsWith('http') ? trimmed : `${API_BASE}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
+        
+        setTimeout(() => {
+          const videoEl = document.getElementById(videoId);
+          if (videoEl) {
+            initHLSVideo(videoEl, resolvedSrc);
+          }
+        }, 100);
+        
+        return `
+          <div class="${extraClasses} flex items-center justify-center" onclick="event.stopPropagation()">
+            <video id="${videoId}" controls preload="metadata" playsinline class="w-full h-full max-h-72 object-contain bg-black"></video>
+          </div>
+        `;
       }
 
       // Detect YouTube URL (watch?v=, youtu.be/, embed/, shorts/, live/)
