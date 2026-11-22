@@ -1740,6 +1740,90 @@
       });
     }
 
+    // Ensure all 5 required tables & schemas exist (auto-migrates from legacy server tables if present)
+    function ensureRequiredTablesExist() {
+      let migrated = false;
+
+      Object.keys(DEFAULT_TABLE_SCHEMAS).forEach(tbl => {
+        if (!Array.isArray(TABLE_SCHEMAS[tbl]) || TABLE_SCHEMAS[tbl].length === 0) {
+          TABLE_SCHEMAS[tbl] = JSON.parse(JSON.stringify(DEFAULT_TABLE_SCHEMAS[tbl]));
+          migrated = true;
+        }
+      });
+
+      // Ensure demos_products has clean video_url column
+      if (Array.isArray(TABLE_SCHEMAS.demos_products)) {
+        const existingVidCol = TABLE_SCHEMAS.demos_products.find(c => c.name === 'video_url');
+        if (!existingVidCol) {
+          TABLE_SCHEMAS.demos_products.splice(1, 0, {
+            name: 'video_url',
+            label: 'Video Demo',
+            type: 'video',
+            core: false
+          });
+          migrated = true;
+        } else if (existingVidCol.label === 'Video Demo (YouTube / MP4 / Tải file - Tùy chọn)') {
+          existingVidCol.label = 'Video Demo';
+          migrated = true;
+        }
+      }
+
+      // Migrate or initialize missing data arrays
+      if (!Array.isArray(db.resources)) {
+        if (Array.isArray(db.resources_networking) && db.resources_networking.length > 0) {
+          db.resources = db.resources_networking
+            .filter(r => r && r.resource_type !== 'Partner Institution')
+            .map(r => ({ ...r }));
+        } else {
+          db.resources = JSON.parse(JSON.stringify(INITIAL_SEED_DB.resources));
+        }
+        migrated = true;
+      }
+
+      if (!Array.isArray(db.demos_products)) {
+        if (Array.isArray(db.products) && db.products.length > 0) {
+          db.demos_products = db.products.map(p => ({
+            thumbnail_url: p.thumbnail_url || '',
+            video_url: p.video_url || '',
+            ...p
+          }));
+        } else {
+          db.demos_products = JSON.parse(JSON.stringify(INITIAL_SEED_DB.demos_products));
+        }
+        migrated = true;
+      }
+
+      if (!Array.isArray(db.news_collaboration)) {
+        db.news_collaboration = JSON.parse(JSON.stringify(INITIAL_SEED_DB.news_collaboration));
+        if (Array.isArray(db.resources_networking)) {
+          const legacyPartners = db.resources_networking.filter(r => r && r.resource_type === 'Partner Institution');
+          legacyPartners.forEach(lp => {
+            const exists = db.news_collaboration.some(n => n.title === lp.item_name);
+            if (!exists && lp.item_name) {
+              db.news_collaboration.push({
+                cover_url: '',
+                title: lp.item_name,
+                entry_type: 'Partner Institution',
+                date_or_spec: lp.specifications || 'Đơn vị Phối hợp',
+                summary: lp.scale_info || '',
+                content: lp.notes || ''
+              });
+            }
+          });
+        }
+        migrated = true;
+      }
+
+      Object.keys(DEFAULT_TABLE_SCHEMAS).forEach(tbl => {
+        if (!Array.isArray(db[tbl])) {
+          db[tbl] = JSON.parse(JSON.stringify(INITIAL_SEED_DB[tbl] || []));
+          migrated = true;
+        }
+      });
+
+      return migrated;
+    }
+
     // ==========================================
     // SERVER API SYNC + INDEXEDDB + LOCALSTORAGE FALLBACK
     // ==========================================
@@ -1754,10 +1838,14 @@
         if (json.success && json.data && json.schemas) {
           db = json.data;
           TABLE_SCHEMAS = json.schemas;
+          const migrated = ensureRequiredTablesExist();
           stripIdFromAllTables();
           await hydrateMediaReferencesInDB();
           isServerConnected = true;
           updateServerSyncBadge(true);
+          if (migrated) {
+            await commitToServer();
+          }
           return true;
         }
         throw new Error('Invalid server response');
@@ -1776,22 +1864,9 @@
           db = JSON.parse(JSON.stringify(INITIAL_SEED_DB));
           TABLE_SCHEMAS = JSON.parse(JSON.stringify(DEFAULT_TABLE_SCHEMAS));
         }
+        ensureRequiredTablesExist();
         stripIdFromAllTables();
         await hydrateMediaReferencesInDB();
-        // Ensure demos_products has video_url column with clean label
-        if (Array.isArray(TABLE_SCHEMAS.demos_products)) {
-          const existingVidCol = TABLE_SCHEMAS.demos_products.find(c => c.name === 'video_url');
-          if (!existingVidCol) {
-            TABLE_SCHEMAS.demos_products.splice(1, 0, {
-              name: 'video_url',
-              label: 'Video Demo',
-              type: 'video',
-              core: false
-            });
-          } else if (existingVidCol.label === 'Video Demo (YouTube / MP4 / Tải file - Tùy chọn)') {
-            existingVidCol.label = 'Video Demo';
-          }
-        }
         return false;
       }
     }
@@ -2696,6 +2771,13 @@
         return;
       }
 
+      if (!Array.isArray(TABLE_SCHEMAS[currentCMSTable])) {
+        TABLE_SCHEMAS[currentCMSTable] = JSON.parse(JSON.stringify(DEFAULT_TABLE_SCHEMAS[currentCMSTable] || []));
+      }
+      if (!Array.isArray(db[currentCMSTable])) {
+        db[currentCMSTable] = [];
+      }
+
       const schema = TABLE_SCHEMAS[currentCMSTable];
       const parsedOptions = type === 'select' ? optionsRaw.split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
@@ -3103,6 +3185,12 @@
     function openRecordModal(tableName, rowIndex = null) {
       editingTable = tableName;
       editingRecordIndex = rowIndex;
+      if (!Array.isArray(TABLE_SCHEMAS[tableName]) || TABLE_SCHEMAS[tableName].length === 0) {
+        TABLE_SCHEMAS[tableName] = JSON.parse(JSON.stringify(DEFAULT_TABLE_SCHEMAS[tableName] || []));
+      }
+      if (!Array.isArray(db[tableName])) {
+        db[tableName] = [];
+      }
       const schema = (TABLE_SCHEMAS[tableName] || []).filter(f => f.name.toLowerCase() !== 'id');
       const record = (rowIndex !== null && rowIndex !== undefined) ? (db[tableName] || [])[rowIndex] : {};
 
@@ -3189,6 +3277,9 @@
 
     function saveRecordForm(e) {
       e.preventDefault();
+      if (!Array.isArray(db[editingTable])) {
+        db[editingTable] = [];
+      }
       const formData = new FormData(e.target);
       const schema = (TABLE_SCHEMAS[editingTable] || []).filter(f => f.name.toLowerCase() !== 'id');
       const payload = {};
@@ -3217,6 +3308,9 @@
 
     function submitQuickPartnerForm(e) {
       e.preventDefault();
+      if (!Array.isArray(db.news_collaboration)) {
+        db.news_collaboration = [];
+      }
       const name = document.getElementById('quickPartnerName').value.trim();
       const spec = document.getElementById('quickPartnerSpec').value;
       const scale = document.getElementById('quickPartnerScale').value.trim();
