@@ -8,7 +8,6 @@
     <title>ANIE – AI for Neurodiversity and Inclusive Education | Research Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1041,7 +1040,7 @@
                                     <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-semibold cursor-pointer text-xs">
                                         <span>🎬 Tải video từ máy</span>
                                         <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden"
-                                               onchange="handleHLSVideoUpload(this, 'newDetailVideoUrl', 'newDetailVideoStatus')" />
+                                               onchange="handleVideoFileUpload(this, 'newDetailVideoUrl', 'newDetailVideoStatus')" />
                                     </label>
                                     <span id="newDetailVideoStatus" class="text-[11px] text-slate-500">Hỗ trợ YouTube, Vimeo, Drive, MP4</span>
                                 </div>
@@ -1257,98 +1256,6 @@
     const SCHEMA_STORAGE_KEY = 'anie_cms_emog_schema_v4_no_id';
     const MEMBER_PASSCODE = 'ANIE2025';
     const API_BASE = window.location.origin;
-
-    function initHLSVideo(videoElement, hlsUrl) {
-        if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(hlsUrl);
-            hls.attachMedia(videoElement);
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                // videoElement.play(); // Do not autoplay
-            });
-        } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-            videoElement.src = hlsUrl;
-        }
-    }
-
-    async function handleHLSVideoUpload(fileInput, urlInputId, statusElementId) {
-        const file = fileInput.files[0];
-        if (!file) return;
-
-        const statusEl = document.getElementById(statusElementId);
-        const urlInput = document.getElementById(urlInputId);
-        const originalStatusText = statusEl.textContent;
-
-        const formData = new FormData();
-        formData.append('video', file);
-
-        const uploadButton = fileInput.closest('label');
-        const originalButtonText = uploadButton.querySelector('span').textContent;
-        uploadButton.querySelector('span').textContent = 'Đang tải lên...';
-        uploadButton.style.pointerEvents = 'none';
-        uploadButton.classList.add('opacity-70');
-
-        try {
-            const response = await fetch('/api/upload-video', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                 const reader = response.body.getReader();
-                 const decoder = new TextDecoder();
-                 let result = '';
-
-                 while (true) {
-                     const { done, value } = await reader.read();
-                     if (done) break;
-                     result += decoder.decode(value, { stream: true });
-
-                     const lines = result.split('\n');
-                     result = lines.pop(); 
-                     for (const line of lines) {
-                         if (line.startsWith('progress:')) {
-                             const progress = JSON.parse(line.substring(9));
-                             if (progress.type === 'upload') {
-                                 uploadButton.querySelector('span').textContent = `Đang tải (${progress.percent.toFixed(0)}%)...`;
-                             } else if (progress.type === 'convert') {
-                                 uploadButton.querySelector('span').textContent = `Đang xử lý...`;
-                             }
-                         } else if (line.startsWith('success:')) {
-                             const data = JSON.parse(line.substring(8));
-                             urlInput.value = data.hlsUrl;
-                             statusEl.textContent = '✅ Đã tải lên HLS thành công!';
-                             statusEl.classList.add('text-green-600', 'font-semibold');
-                             uploadButton.querySelector('span').textContent = 'Thành công!';
-                             setTimeout(() => {
-                                 statusEl.textContent = originalStatusText;
-                                 statusEl.classList.remove('text-green-600', 'font-semibold');
-                                 uploadButton.querySelector('span').textContent = originalButtonText;
-                                 uploadButton.style.pointerEvents = 'auto';
-                                 uploadButton.classList.remove('opacity-70');
-                             }, 4000);
-                         }
-                     }
-                 }
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Lỗi không xác định');
-            }
-
-        } catch (error) {
-            console.error('Upload Error:', error);
-            statusEl.textContent = `Lỗi: ${error.message}`;
-            statusEl.classList.add('text-rose-600', 'font-semibold');
-            uploadButton.querySelector('span').textContent = 'Thất bại!';
-            setTimeout(() => {
-                statusEl.textContent = originalStatusText;
-                statusEl.classList.remove('text-rose-600', 'font-semibold');
-                uploadButton.querySelector('span').textContent = originalButtonText;
-                uploadButton.style.pointerEvents = 'auto';
-                uploadButton.classList.remove('opacity-70');
-            }, 5000);
-        }
-    }
 
     // 5-Table Schema WITHOUT `id` field (all columns freely editable/deletable)
     const DEFAULT_TABLE_SCHEMAS = {
@@ -2058,40 +1965,6 @@
       `;
     }
 
-    // Store HLS instances to manage them properly
-    window.hlsInstances = {};
-
-    function initHLSVideo(videoElement, videoUrl) {
-      if (!videoElement || !videoUrl) return;
-      
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60
-        });
-        
-        hls.loadSource(videoUrl);
-        hls.attachMedia(videoElement);
-        
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-          videoElement.play().catch(() => {});
-        });
-        
-        const videoId = videoElement.id || `hls-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-        videoElement.id = videoId;
-        window.hlsInstances[videoId] = hls;
-        
-        videoElement.addEventListener('destroy', () => {
-          if (window.hlsInstances[videoId]) {
-            window.hlsInstances[videoId].destroy();
-            delete window.hlsInstances[videoId];
-          }
-        });
-      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        videoElement.src = videoUrl;
-      }
-    }
-
     function renderVideoPlayerHTML(videoUrl, extraClasses = 'w-full aspect-video rounded-xl bg-slate-950 overflow-hidden shadow-sm') {
       if (!videoUrl || typeof videoUrl !== 'string') return '';
       let trimmed = videoUrl.trim();
@@ -2110,27 +1983,6 @@
           });
           return `<div class="${extraClasses} flex items-center justify-center text-white text-xs">Đang nạp video từ bộ nhớ...</div>`;
         }
-      }
-
-      // Detect HLS URL (.m3u8)
-      const isHLS = trimmed.endsWith('.m3u8') || trimmed.includes('.m3u8');
-      
-      if (isHLS) {
-        const videoId = `hls-video-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-        const resolvedSrc = trimmed.startsWith('http') ? trimmed : `${API_BASE}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
-        
-        setTimeout(() => {
-          const videoEl = document.getElementById(videoId);
-          if (videoEl) {
-            initHLSVideo(videoEl, resolvedSrc);
-          }
-        }, 100);
-        
-        return `
-          <div class="${extraClasses} flex items-center justify-center" onclick="event.stopPropagation()">
-            <video id="${videoId}" controls preload="metadata" playsinline class="w-full h-full max-h-72 object-contain bg-black"></video>
-          </div>
-        `;
       }
 
       // Detect YouTube URL (watch?v=, youtu.be/, embed/, shorts/, live/)
