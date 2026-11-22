@@ -14,7 +14,6 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
-const { exec } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,17 +27,12 @@ app.use(express.static(path.join(__dirname)));
 
 // Create uploads directory if not exists
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
-const HLS_UPLOADS_DIR = path.join(__dirname, 'uploads/hls');
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
-if (!fs.existsSync(HLS_UPLOADS_DIR)) {
-  fs.mkdirSync(HLS_UPLOADS_DIR, { recursive: true });
 }
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(UPLOADS_DIR));
-app.use('/uploads/hls', express.static(HLS_UPLOADS_DIR));
 
 // ── Multer configuration for file uploads ──────────────────
 const storage = multer.diskStorage({
@@ -68,36 +62,6 @@ const upload = multer({
       return cb(null, true);
     } else {
       cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif, webp, svg)'));
-    }
-  }
-});
-
-// ── Multer configuration for video uploads ─────────────────
-const videoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR); // Videos are temporarily stored in 'uploads'
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = uuidv4();
-    const ext = path.extname(file.originalname);
-    cb(null, `video-${uniqueSuffix}${ext}`);
-  }
-});
-
-const uploadVideo = multer({
-  storage: videoStorage,
-  limits: {
-    fileSize: 500 * 1024 * 1024 // 500MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /mp4|mov|avi|mkv|webm/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = file.mimetype.startsWith('video/');
-    
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Chỉ chấp nhận file video (mp4, mov, avi, mkv, webm)'));
     }
   }
 });
@@ -471,52 +435,6 @@ app.get('/api/logo', async (req, res) => {
     console.error('[ERROR] GET /api/logo:', err);
     res.status(500).json({ success: false, error: err.message });
   }
-});
-
-/**
- * POST /api/upload-video
- * Uploads a video file, converts it to HLS, and saves the URL.
- */
-app.post('/api/upload-video', uploadVideo.single('video'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, error: 'Không có file video được tải lên' });
-  }
-
-  const inputFile = req.file.path;
-  const outputFileName = `${path.parse(req.file.filename).name}.m3u8`;
-  const outputDir = HLS_UPLOADS_DIR;
-  const outputPath = path.join(outputDir, outputFileName);
-  const publicUrl = `/uploads/hls/${outputFileName}`;
-
-  // FFmpeg command to convert to HLS
-  const ffmpegCommand = `ffmpeg -i "${inputFile}" -profile:v baseline -level 3.0 -s 640x360 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls "${outputPath}"`;
-
-  exec(ffmpegCommand, async (error, stdout, stderr) => {
-    // Delete the original uploaded file after conversion
-    fs.unlink(inputFile, (unlinkErr) => {
-      if (unlinkErr) console.error(`[ERROR] Failed to delete temporary video file: ${inputFile}`, unlinkErr);
-    });
-
-    if (error) {
-      console.error(`[ERROR] FFmpeg exec error: ${error.message}`);
-      console.error(`[ERROR] FFmpeg stderr: ${stderr}`);
-      return res.status(500).json({ success: false, error: 'Video conversion failed.', details: stderr });
-    }
-
-    try {
-      // Save the HLS playlist URL to settings
-      await db.execute(
-        'INSERT OR REPLACE INTO cms_settings (key, value) VALUES (?, ?)',
-        ['video_url', publicUrl]
-      );
-      
-      console.log(`[INFO] Video converted successfully: ${publicUrl}`);
-      res.json({ success: true, url: publicUrl });
-    } catch (dbError) {
-      console.error('[ERROR] Failed to save video URL to database:', dbError);
-      res.status(500).json({ success: false, error: 'Failed to save video URL to database.' });
-    }
-  });
 });
 
 // ── Fallback: serve anie-hmi.html for any non-API route ───
