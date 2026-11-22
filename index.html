@@ -1258,6 +1258,98 @@
     const MEMBER_PASSCODE = 'ANIE2025';
     const API_BASE = window.location.origin;
 
+    function initHLSVideo(videoElement, hlsUrl) {
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(hlsUrl);
+            hls.attachMedia(videoElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                // videoElement.play(); // Do not autoplay
+            });
+        } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+            videoElement.src = hlsUrl;
+        }
+    }
+
+    async function handleVideoFileUpload(fileInput, urlInputId, statusElementId) {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const statusEl = document.getElementById(statusElementId);
+        const urlInput = document.getElementById(urlInputId);
+        const originalStatusText = statusEl.textContent;
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        const uploadButton = fileInput.closest('label');
+        const originalButtonText = uploadButton.querySelector('span').textContent;
+        uploadButton.querySelector('span').textContent = 'Đang tải lên...';
+        uploadButton.style.pointerEvents = 'none';
+        uploadButton.classList.add('opacity-70');
+
+        try {
+            const response = await fetch('/api/upload-video', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                 const reader = response.body.getReader();
+                 const decoder = new TextDecoder();
+                 let result = '';
+
+                 while (true) {
+                     const { done, value } = await reader.read();
+                     if (done) break;
+                     result += decoder.decode(value, { stream: true });
+
+                     const lines = result.split('\n');
+                     result = lines.pop(); 
+                     for (const line of lines) {
+                         if (line.startsWith('progress:')) {
+                             const progress = JSON.parse(line.substring(9));
+                             if (progress.type === 'upload') {
+                                 uploadButton.querySelector('span').textContent = `Đang tải (${progress.percent.toFixed(0)}%)...`;
+                             } else if (progress.type === 'convert') {
+                                 uploadButton.querySelector('span').textContent = `Đang xử lý...`;
+                             }
+                         } else if (line.startsWith('success:')) {
+                             const data = JSON.parse(line.substring(8));
+                             urlInput.value = data.hlsUrl;
+                             statusEl.textContent = '✅ Đã tải lên HLS thành công!';
+                             statusEl.classList.add('text-green-600', 'font-semibold');
+                             uploadButton.querySelector('span').textContent = 'Thành công!';
+                             setTimeout(() => {
+                                 statusEl.textContent = originalStatusText;
+                                 statusEl.classList.remove('text-green-600', 'font-semibold');
+                                 uploadButton.querySelector('span').textContent = originalButtonText;
+                                 uploadButton.style.pointerEvents = 'auto';
+                                 uploadButton.classList.remove('opacity-70');
+                             }, 4000);
+                         }
+                     }
+                 }
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Lỗi không xác định');
+            }
+
+        } catch (error) {
+            console.error('Upload Error:', error);
+            statusEl.textContent = `Lỗi: ${error.message}`;
+            statusEl.classList.add('text-rose-600', 'font-semibold');
+            uploadButton.querySelector('span').textContent = 'Thất bại!';
+            setTimeout(() => {
+                statusEl.textContent = originalStatusText;
+                statusEl.classList.remove('text-rose-600', 'font-semibold');
+                uploadButton.querySelector('span').textContent = originalButtonText;
+                uploadButton.style.pointerEvents = 'auto';
+                uploadButton.classList.remove('opacity-70');
+            }, 5000);
+        }
+    }
+
     // 5-Table Schema WITHOUT `id` field (all columns freely editable/deletable)
     const DEFAULT_TABLE_SCHEMAS = {
       people: [
