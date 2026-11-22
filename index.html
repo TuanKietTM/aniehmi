@@ -1641,20 +1641,25 @@
             idb.createObjectStore(IDB_STORE);
           }
         };
+        req.onblocked = () => reject(new Error('IndexedDB blocked'));
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
       });
     }
 
-    async function idbSetItem(key, val) {
+    async function idbSetItem(key, val, timeoutMs = 6000) {
       try {
         const idb = await openAnieIDB();
-        return new Promise((resolve, reject) => {
-          const tx = idb.transaction(IDB_STORE, 'readwrite');
-          tx.objectStore(IDB_STORE).put(val, key);
-          tx.oncomplete = () => resolve(true);
-          tx.onerror = () => reject(tx.error);
-        });
+        return await Promise.race([
+          new Promise((resolve, reject) => {
+            const tx = idb.transaction(IDB_STORE, 'readwrite');
+            tx.objectStore(IDB_STORE).put(val, key);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(new Error('IndexedDB aborted'));
+          }),
+          new Promise((resolve) => setTimeout(() => resolve(false), timeoutMs))
+        ]);
       } catch (err) {
         return false;
       }
@@ -1663,7 +1668,7 @@
     async function idbGetItem(key) {
       try {
         const idb = await openAnieIDB();
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
           const tx = idb.transaction(IDB_STORE, 'readonly');
           const req = tx.objectStore(IDB_STORE).get(key);
           req.onsuccess = () => resolve(req.result !== undefined ? req.result : null);
@@ -3060,65 +3065,90 @@
       openItemDetailModal(currentDetailTable, currentDetailIndex);
     }
 
-    // High-capacity video upload (Server /api/upload-video first, then IndexedDB idb:// fallback)
+    // High-capacity video upload (Server /api/upload-video with progress + fast IndexedDB fallback)
     async function handleVideoFileUpload(fileInput, targetInputId, statusElId) {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
       const statusEl = statusElId ? document.getElementById(statusElId) : null;
       const targetInput = document.getElementById(targetInputId);
+      const sizeMB = file.size / (1024 * 1024);
 
       if (statusEl) {
-        statusEl.textContent = 'Đang xử lý video...';
+        statusEl.textContent = `Đang tải video (${sizeMB.toFixed(1)} MB)...`;
         statusEl.className = 'text-[11px] font-semibold text-amber-700';
       }
 
-      // 1. Try uploading to backend server (/api/upload-video) if connected
+      // 1. Try uploading to backend server (/api/upload-video) with live % progress & timeout
       if (isServerConnected) {
-        try {
+        const serverUrl = await new Promise((resolve) => {
+          const xhr = new XMLHttpRequest();
           const formData = new FormData();
           formData.append('video', file);
-          const response = await fetch(`${API_BASE}/api/upload-video`, {
-            method: 'POST',
-            body: formData
-          });
-          const contentType = response.headers.get('content-type') || '';
-          if (response.ok && contentType.includes('application/json')) {
-            const result = await response.json();
-            if (result.success && result.url) {
-              const finalUrl = result.url.startsWith('http') ? result.url : `${API_BASE}${result.url}`;
-              if (targetInput) targetInput.value = finalUrl;
-              if (statusEl) {
-                statusEl.textContent = `✓ Đã tải lên server (${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
-                statusEl.className = 'text-[11px] font-semibold text-emerald-700';
-              }
-              return;
+
+          xhr.open('POST', `${API_BASE}/api/upload-video`, true);
+          xhr.timeout = 15000;
+
+          xhr.upload.onprogress = (evt) => {
+            if (evt.lengthComputable && statusEl) {
+              const pct = Math.round((evt.loaded / evt.total) * 100);
+              statusEl.textContent = `Đang tải lên server: ${pct}% (${sizeMB.toFixed(1)} MB)...`;
             }
+          };
+
+          xhr.onload = () => {
+            try {
+              const ct = xhr.getResponseHeader('content-type') || '';
+              if (xhr.status >= 200 && xhr.status < 300 && ct.includes('application/json')) {
+                const result = JSON.parse(xhr.responseText);
+                if (result.success && result.url) {
+                  resolve(result.url.startsWith('http') ? result.url : `${API_BASE}${result.url}`);
+                  return;
+                }
+              }
+            } catch (e) { /* fallback */ }
+            resolve(null);
+          };
+
+          xhr.onerror = () => resolve(null);
+          xhr.ontimeout = () => resolve(null);
+          xhr.send(formData);
+        });
+
+        if (serverUrl) {
+          if (targetInput) targetInput.value = serverUrl;
+          if (statusEl) {
+            statusEl.textContent = `✓ Đã tải lên server (${sizeMB.toFixed(1)} MB)`;
+            statusEl.className = 'text-[11px] font-semibold text-emerald-700';
           }
-        } catch (err) {
-          // Fallback to IndexedDB storage below
+          fileInput.value = '';
+          return;
         }
       }
 
-      // 2. Store binary Video File directly inside IndexedDB (no 5MB localStorage quota error)
-      const sizeMB = file.size / (1024 * 1024);
+      // 2. Instant local playback via Blob URL + non-blocking IndexedDB persistence (with timeout)
       const mediaKey = `idb://video_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
       const blobUrl = URL.createObjectURL(file);
       inMemoryMediaMap[mediaKey] = blobUrl;
 
-      const savedToIDB = await idbSetItem(mediaKey, file);
+      if (statusEl) {
+        statusEl.textContent = `Đang lưu vào bộ nhớ trình duyệt (${sizeMB.toFixed(1)} MB)...`;
+      }
+
+      const savedToIDB = await idbSetItem(mediaKey, file, 6000);
       if (savedToIDB) {
         if (targetInput) targetInput.value = mediaKey;
         if (statusEl) {
-          statusEl.textContent = `✓ Đã lưu video vào bộ nhớ IndexedDB (${sizeMB.toFixed(1)} MB)`;
+          statusEl.textContent = `✓ Đã lưu video cục bộ (${sizeMB.toFixed(1)} MB)`;
           statusEl.className = 'text-[11px] font-semibold text-emerald-700';
         }
       } else {
         if (targetInput) targetInput.value = blobUrl;
         if (statusEl) {
-          statusEl.textContent = `✓ Đã nạp video (${sizeMB.toFixed(1)} MB)`;
-          statusEl.className = 'text-[11px] font-semibold text-emerald-700';
+          statusEl.textContent = `✓ Đã nạp phát ngay (${sizeMB.toFixed(1)} MB – chỉ phiên này)`;
+          statusEl.className = 'text-[11px] font-semibold text-teal-700';
         }
       }
+      fileInput.value = '';
     }
 
     function addDetailExternalLink(e) {
