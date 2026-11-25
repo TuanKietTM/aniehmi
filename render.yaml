@@ -12,3 +12,11 @@ services:
         sync: false
       - key: TURSO_AUTH_TOKEN
         sync: false
+      # ANIE CMS (/cms): first administrator, created/updated at every start
+      - key: CMS_ADMIN_EMAIL
+        sync: false
+      - key: CMS_ADMIN_PASSWORD
+        sync: false
+      # Secret used to sign login tokens (auto-generated once by Render)
+      - key: CMS_SECRET
+        generateValue: true
